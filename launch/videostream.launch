@@ -1,0 +1,4 @@
+<launch>
+    <node name="ros_videostream" pkg="videostream" type="ros_videostream" output="screen"/>
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find videostream)/rviz/videostream.rviz"/>
+</launch>
