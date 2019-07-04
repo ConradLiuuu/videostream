@@ -139,6 +139,7 @@ include_directories(
 add_executable(ros_videostream src/ros_videostream.cpp)
 add_executable(displayimg src/displayimg.cpp)
 add_executable(capturevideo src/capturevideo.cpp)
+add_executable(canny src/canny.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -161,6 +162,11 @@ target_link_libraries(ros_videostream
     ${OpenCV_LIBS} 
     ${catkin_LIBRARIES}
 )
+target_link_libraries(canny
+    ${OpenCV_LIBS}
+    ${catkin_LIBRARIES}
+)
+
 
 #############
 ## Install ##

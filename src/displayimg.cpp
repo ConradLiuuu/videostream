@@ -4,11 +4,11 @@ using namespace cv;
 
 int main(int argc, char** argv)
 {
-  Mat img;
-  img = imread("/home/gtliu/IMG.JPG");
+  Mat lenna = imread("/home/gtliu/lenna.jpeg");
+  //img = imread("/home/gtliu/lenna.jpeg");
 
-  namedWindow("Display Image",WINDOW_AUTOSIZE);
-  imshow("Display Image",img);
+  namedWindow("Figure",WINDOW_NORMAL);
+  imshow("Figure",lenna);
 
   waitKey(0);
   //destroyWindow("IMG");
