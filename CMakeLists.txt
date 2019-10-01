@@ -119,8 +119,8 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
- ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS}
+ include
+ ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} /usr/include/flycapture 
 )
 
 ## Declare a C++ library
@@ -142,6 +142,8 @@ add_executable(capturevideo src/capturevideo.cpp)
 add_executable(canny src/canny.cpp)
 add_executable(HSV_reconfigure src/HSV_reconfigure.cpp)
 add_executable(object_detect src/object_detect.cpp)
+add_executable(flycapture src/flycapture.cpp)
+add_executable(ros_flycapture src/ros_flycapture.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -176,7 +178,8 @@ target_link_libraries(object_detect
     ${OpenCV_LIBS}
     ${catkin_LIBRARIES}
 )
-
+target_link_libraries(flycapture ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+target_link_libraries(ros_flycapture ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 #############
 ## Install ##
 #############
