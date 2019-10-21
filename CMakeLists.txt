@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(videostream)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+ add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -144,6 +144,13 @@ add_executable(HSV_reconfigure src/HSV_reconfigure.cpp)
 add_executable(object_detect src/object_detect.cpp)
 add_executable(flycapture src/flycapture.cpp)
 add_executable(ros_flycapture src/ros_flycapture.cpp)
+add_executable(flycapture_HSV_reconfugure src/flycapture_HSV_reconfugure.cpp)
+add_executable(eyes_HSV_reconfigure src/eyes_HSV_reconfigure.cpp)
+add_executable(flycapture_findball src/flycapture_findball.cpp)
+add_executable(fps src/fps.cpp)
+add_executable(takePhoto src/takePhoto.cpp)
+add_executable(findcontour src/findcontour.cpp)
+add_executable(frameRate src/frameRate.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -179,7 +186,23 @@ target_link_libraries(object_detect
     ${catkin_LIBRARIES}
 )
 target_link_libraries(flycapture ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
 target_link_libraries(ros_flycapture ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(flycapture_HSV_reconfugure ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(eyes_HSV_reconfigure ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(flycapture_findball ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(fps ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(takePhoto ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(findcontour ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(frameRate ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
 #############
 ## Install ##
 #############

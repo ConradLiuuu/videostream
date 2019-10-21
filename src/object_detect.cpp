@@ -27,6 +27,8 @@ int main(int argc, char **argv)
 
   inRange(img_hsv, Scalar(H_min, S_min, V_min), Scalar(H_max, S_max, V_max), threshold);
 
+  namedWindow("origin image", 0);
+  namedWindow("threshold image", 0);
   imshow("origin image", img);
   imshow("threshold image", threshold);
   waitKey();

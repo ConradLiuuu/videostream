@@ -3,7 +3,8 @@
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
-#include <typeinfo>
+//#include <time.h>
+#include <ctime>
 
 using namespace FlyCapture2;
 using namespace std;
@@ -49,7 +50,6 @@ int main()
     }
     std::cout << camInfo.vendorName << " "
               << camInfo.modelName << " " 
-              << camInfo.sensorResolution << " "
               << camInfo.serialNumber << std::endl;
 	
     error = camera.StartCapture();
@@ -71,38 +71,41 @@ int main()
     unsigned int rowBytes;
     Image rawImage;
     Image rgbImage;
-    Error err;
-
-    //int videoMode, frameRate;
-    VideoMode videoMode;
-    //VideoMode VIDEOMODE_2048x1536Y8;
-    FrameRate frameRate;
-    //FrameRate FRAMERATE_120;
-    bool* pSupported;
 
     Property frmRate;
     frmRate.type = FRAME_RATE;
-    err = camera.GetProperty(&frmRate);
+    Error err = camera.GetProperty(&frmRate);
     cout << "Setting frameRate = " << frmRate.absValue << endl;
-    //camera.SetVideoModeAndFrameRate(VideoMode, FrameRate);
-    //cout << "type:" << typeid(frameRate).name() << endl;
+
+    double fps;
+    //time_t start, end;
+    clock_t start, end;
+    double second;
+    int num_frames = frmRate.absValue;
+    int dif;
+    clock_t s,d;
 
     while(key != 'q')
     {
-        //err = camera.GetVideoModeAndFrameRateInfo(videoMode, frameRate, pSupported);
-        //cout << "true or not :" << pSupported << endl;
-        //cout << "video mode :" << videoMode << endl;
-        //cout << "frame rate = " << frameRate << endl;
-
+      //time(&start);
+      start = clock();
+      //s = clock();
+      Error error = camera.RetrieveBuffer( &rawImage );
+      //d = clock();
+      //cout << "buffer time:" << d-s << endl;
+      
+      for (int i = 0; i  < num_frames; i++){
         // Get the image
         //Image rawImage;
-        err = camera.RetrieveBuffer( &rawImage );
-        if ( err != PGRERROR_OK )
+        
+        //Error error = camera.RetrieveBuffer( &rawImage );
+        /*
+        if ( error != PGRERROR_OK )
         {
                 std::cout << "capture error" << std::endl;
                 continue;
         }
-
+        */
         // convert to rgb
         //Image rgbImage;
         rawImage.Convert( FlyCapture2::PIXEL_FORMAT_BGR, &rgbImage );
@@ -113,6 +116,22 @@ int main()
 
         //cv::namedWindow("image", 0);
         cv::imshow("image", image);
+      }
+      //time(&end);
+      end = clock();
+      //dif = end - start;
+      //second = difftime(end, start);
+      second = dif/CLOCKS_PER_SEC;
+      //cout << "Time taken:" << second << " sec" << endl;
+      dif = end - start;
+      cout << dif << endl;
+      cout << CLOCKS_PER_SEC << endl;
+
+      //fps = num_frames / second;
+      fps = num_frames * CLOCKS_PER_SEC / dif;
+      cout << "Estimated frame rate:" << fps << endl;
+
+        //cv::imshow("image", image);
         key = cv::waitKey(1);        
     }
 
