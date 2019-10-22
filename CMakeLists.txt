@@ -151,6 +151,8 @@ add_executable(fps src/fps.cpp)
 add_executable(takePhoto src/takePhoto.cpp)
 add_executable(findcontour src/findcontour.cpp)
 add_executable(frameRate src/frameRate.cpp)
+add_executable(frameRate_origin src/frameRate_origin.cpp)
+add_executable(flycapture_image_processing src/flycapture_image_processing.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -202,6 +204,10 @@ target_link_libraries(takePhoto ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -
 target_link_libraries(findcontour ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 target_link_libraries(frameRate ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(frameRate_origin ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(flycapture_image_processing ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 #############
 ## Install ##

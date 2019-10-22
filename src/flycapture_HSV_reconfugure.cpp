@@ -117,14 +117,14 @@ int main(int argc, char **argv)
     pub_canny.publish(msg_canny);
     ros::spinOnce();
     rate.sleep();
-
+/*
     cv::namedWindow("img", 0);
     cv::imshow("img", img);
 
     cv::namedWindow("canny", 0);
     cv::imshow("canny", img_canny);
     key = cv::waitKey(1);
-
+*/
   }
 
   //error = camera.StopCapture();
