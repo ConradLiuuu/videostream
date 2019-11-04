@@ -153,6 +153,11 @@ add_executable(findcontour src/findcontour.cpp)
 add_executable(frameRate src/frameRate.cpp)
 add_executable(frameRate_origin src/frameRate_origin.cpp)
 add_executable(flycapture_image_processing src/flycapture_image_processing.cpp)
+add_executable(thread_frameRate src/thread_frameRate.cpp)
+add_executable(frameRate_left src/frameRate_left.cpp)
+add_executable(frameRate_oop src/frameRate_oop.cpp)
+add_executable(frameRate_eyes src/frameRate_eyes.cpp)
+add_executable(frameRate_eyes_timer src/frameRate_eyes_timer.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -208,6 +213,16 @@ target_link_libraries(frameRate ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -
 target_link_libraries(frameRate_origin ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 target_link_libraries(flycapture_image_processing ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_frameRate ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(frameRate_left ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(frameRate_oop ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(frameRate_eyes ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(frameRate_eyes_timer ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 #############
 ## Install ##
