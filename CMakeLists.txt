@@ -151,13 +151,22 @@ add_executable(fps src/fps.cpp)
 add_executable(takePhoto src/takePhoto.cpp)
 add_executable(findcontour src/findcontour.cpp)
 add_executable(frameRate src/frameRate.cpp)
-add_executable(frameRate_origin src/frameRate_origin.cpp)
+add_executable(frameRate_right src/frameRate_right.cpp)
 add_executable(flycapture_image_processing src/flycapture_image_processing.cpp)
 add_executable(thread_frameRate src/thread_frameRate.cpp)
 add_executable(frameRate_left src/frameRate_left.cpp)
 add_executable(frameRate_oop src/frameRate_oop.cpp)
 add_executable(frameRate_eyes src/frameRate_eyes.cpp)
 add_executable(frameRate_eyes_timer src/frameRate_eyes_timer.cpp)
+add_executable(eye_image_process src/eye_image_process.cpp)
+add_executable(image_process_left src/image_process_left.cpp)
+add_executable(image_process_right src/image_process_right.cpp)
+add_executable(positioning src/positioning.cpp)
+add_executable(sampling_timer src/sampling_timer.cpp)
+add_executable(image_process_test src/image_process_test.cpp)
+add_executable(thread_oop_test src/thread_oop_test.cpp)
+add_executable(thread_left src/thread_left.cpp)
+add_executable(thread_right src/thread_right.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -210,7 +219,7 @@ target_link_libraries(findcontour ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib
 
 target_link_libraries(frameRate ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
-target_link_libraries(frameRate_origin ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+target_link_libraries(frameRate_right ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 target_link_libraries(flycapture_image_processing ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
@@ -223,6 +232,24 @@ target_link_libraries(frameRate_oop ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../l
 target_link_libraries(frameRate_eyes ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 target_link_libraries(frameRate_eyes_timer ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(eye_image_process ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(image_process_left ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(image_process_right ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(positioning ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(image_process_test ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(sampling_timer ${OpenCV_LIBS} ${catkin_LIBRARIES})
+
+target_link_libraries(thread_oop_test ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_left ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_right ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 #############
 ## Install ##

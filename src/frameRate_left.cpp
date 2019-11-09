@@ -5,8 +5,8 @@
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/UInt8.h>
 #include <iostream>
-#include <ctime>
 
 using namespace FlyCapture2;
 using namespace std;
@@ -14,169 +14,105 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-
   ros::init(argc, argv, "frameRate_left");
   ros::NodeHandle nh;
+  ros::Publisher pub_frameRate = nh.advertise<std_msgs::Float32>("frameRate_left",1,false);
+  //ros::Publisher pub_cnt = nh.advertise<std_msgs::UInt8>("count_left",1,false);
+  ros::Rate rate(60);
+  ros::Timer timer;
 
   image_transport::ImageTransport it(nh);
-  image_transport::Publisher pub_left = it.advertise("left_camera",1);
-  //image_transport::Publisher pub_right = it.advertise("right_camera",1);
-  ros::Rate rate(30);
-  sensor_msgs::ImagePtr msg_left, msg_right;
+  image_transport::Publisher pub = it.advertise("left_camera",1);
+  sensor_msgs::ImagePtr msg;
+  std_msgs::Float32 frameRate;
+  std_msgs::UInt8 count;
 
-  ros::Publisher pub_frameRate_left = nh.advertise<std_msgs::Float32>("frameRate_left",1,false);
-  //ros::Publisher pub_frameRate_right = nh.advertise<std_msgs::Float32>("frameRate_right",1,false);
-  std_msgs::Float32 frameRate_left;
-
-
-  unsigned int SerialNumberL = 17491073;
-  //unsigned int SerialNumberR = 17491067;
+  unsigned int SerialNumber = 17491073;
 
   BusManager busMgr;
+  Error error;
+  Camera camera;
+  CameraInfo camInfo;
+  PGRGuid guid;
 
-  // Left eye 
-  Error error_L;
-  Camera camera_L;
-  CameraInfo camInfo_L;
-  PGRGuid guid_L;
-/*
-  // Right eye
-  Error error_R;
-  Camera camera_R;
-  CameraInfo camInfo_R;
-  PGRGuid guid_R;
-*/
   // Connect camera
-  busMgr.GetCameraFromSerialNumber(SerialNumberL, &guid_L);
-  error_L = camera_L.Connect(&guid_L);
-  if (error_L != PGRERROR_OK){
-    //ROS_INFO("Failed to connect to left camera");
+  busMgr.GetCameraFromSerialNumber(SerialNumber, &guid);
+  error = camera.Connect(&guid);
+  if (error != PGRERROR_OK){
+    ROS_INFO("Failed to connect to left camera");
     return false;
   }
-/*
-  busMgr.GetCameraFromSerialNumber(SerialNumberR, &guid_R);
-  error_R = camera_R.Connect(&guid_R);
-  if (error_R != PGRERROR_OK){
-    //ROS_INFO("Failed to connect to right camera");
+
+  error = camera.StartCapture();
+  if ( error == PGRERROR_ISOCH_BANDWIDTH_EXCEEDED ){
+    ROS_INFO("Bandwidth exceeded");
     return false;
   }
-*/
-  // Start capture image
-  error_L = camera_L.StartCapture();
-  if ( error_L == PGRERROR_ISOCH_BANDWIDTH_EXCEEDED ){
-    //ROS_INFO("Bandwidth exceeded");
+  else if (error != PGRERROR_OK){
+    ROS_INFO("Failed to start image capture");
     return false;
   }
-  else if (error_L != PGRERROR_OK){
-    //ROS_INFO("Failed to start image capture");
-    return false;
-  }
-/*
-  error_R = camera_R.StartCapture();
-  if ( error_R == PGRERROR_ISOCH_BANDWIDTH_EXCEEDED ){
-    //ROS_INFO("Bandwidth exceeded");
-    return false;
-  }
-  else if (error_R != PGRERROR_OK){
-    //ROS_INFO("Failed to start image capture");
-    return false;
-  }
-*/
-  // capture loop
-  cv::Mat img_L, img_R;
 
-  Image rawImage_L;
-  Image bgrImage_L;
-  Image rawImage_R;
-  Image bgrImage_R;
+  // Capture loop
+  cv::Mat img;
+  Image rawImage;
+  Image bgrImage;
+  unsigned int rowBytes;
 
-  unsigned int rowBytes_L;
-  unsigned int rowBytes_R;
+  Property frmRate;
+  frmRate.type = FRAME_RATE;
+  error = camera.GetProperty(&frmRate);
+  ROS_INFO("Left camera setting frameRate = %f", frmRate.absValue);
 
-  Error err_L;
-  Error err_R;
-
-  char key = 0;
-
-  //cv::namedWindow("image left", 0);
-  //cv::namedWindow("image right", 0);
-
-  Property frmRate_L;
-  frmRate_L.type = FRAME_RATE;
-  err_L = camera_L.GetProperty(&frmRate_L);
-  cout << "Left camera setting frameRate = " << frmRate_L.absValue << endl;
-/*
-  Property frmRate_R;
-  frmRate_R.type = FRAME_RATE;
-  err_R = camera_R.GetProperty(&frmRate_R);
-  cout << "Right camera setting frameRate = " << frmRate_R.absValue << endl;
-*/
-  int num_frames_L = frmRate_L.absValue;
-  //int num_frames_R = frmRate_R.absValue;
   double second;
   double fps;
+  int cnt = 1;
 
-  clock_t start_L, end_L, start_R, end_R;
+  double startt, endd;
 
-  //while (key != 'q'){
   while (ros::ok()){
     //cout << "main thread on cpu:" << sched_getcpu() << endl;
-    // Calculate left camera frame rate
-    start_L = clock();
-    for (int i = 0; i  < num_frames_L; i++){
-      err_L = camera_L.RetrieveBuffer(&rawImage_L);
-      rawImage_L.Convert(FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage_L);
-      rowBytes_L = (double)bgrImage_L.GetReceivedDataSize() / (double)bgrImage_L.GetRows();
-      img_L = cv::Mat(bgrImage_L.GetRows(), bgrImage_L.GetCols(), CV_8UC3, bgrImage_L.GetData(), rowBytes_L);
-      //cv::imshow("image left", img_L);
-      //key = cv::waitKey(1);
-      msg_left = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_L).toImageMsg();
-      pub_left.publish(msg_left);
-      ros::spinOnce();
-      rate.sleep();
-    }
-    end_L = clock();
-    second = (double) difftime(end_L, start_L) / CLOCKS_PER_SEC;
-    fps = (double) num_frames_L / (second); 
-    frameRate_left.data = fps;
-    pub_frameRate_left.publish(frameRate_left);
-    ROS_INFO("Taken time = %f", second);
-    ROS_INFO("Estimate frame rate = %f", fps);
-    //ros::spinOnce();
 
-    
-    //cout << "Taken time of left camera:" << second << endl;
-    //cout << "Estimated left camera frame rate:" << fps << endl << endl;
-/*
     // Calculate right camera frame rate
-    start_R = clock();
-    for (int i = 0; i  < num_frames_R; i++){
-      err_R = camera_R.RetrieveBuffer(&rawImage_R);
-      rawImage_R.Convert(FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage_R);
-      rowBytes_R = (double)bgrImage_R.GetReceivedDataSize() / (double)bgrImage_R.GetRows();
-      img_R = cv::Mat(bgrImage_R.GetRows(), bgrImage_R.GetCols(), CV_8UC3, bgrImage_R.GetData(), rowBytes_R);
-      //cv::imshow("image right", img_R);
-      //key = cv::waitKey(1);
-      msg_right = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_R).toImageMsg();
-      pub_right.publish(msg_right);
-      ros::spinOnce();
+    if (cnt == 1){
+      startt = ros::Time::now().toSec();
     }
-    end_R = clock();
-    second = (double) difftime(end_R, start_R) / CLOCKS_PER_SEC;
-    fps = (double) num_frames_R / (second);
-    frameRate_right.data = fps;
-    pub_frameRate_right.publish(frameRate_right);
-    //ros::spinOnce();
-    cout << "Taken time of right camera:" << second << endl;
-    cout << "Estimated right camera frame rate:" << fps << endl << endl;
-*/
-    //key = cv::waitKey(1); // wait 1 milli second
-    //rate.sleep();
+
+    //ROS_INFO("Left camera start capture image %d \n", cnt);
+    
+    error = camera.RetrieveBuffer(&rawImage);
+    rawImage.Convert(FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage);
+    rowBytes = (double)bgrImage.GetReceivedDataSize() / (double)bgrImage.GetRows();
+    img = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(), rowBytes);
+
+    msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img).toImageMsg();
+    pub.publish(msg);
+    //count.data = cnt;
+    //pub_cnt.publish(count);
+    ros::spinOnce();
+    rate.sleep();
+    cnt += 1;
+
+    if (cnt == (int)frmRate.absValue){
+      endd = ros::Time::now().toSec();
+      second = endd - startt;
+      fps = (double) frmRate.absValue / (second);
+      frameRate.data = fps;
+      pub_frameRate.publish(frameRate);
+
+      cout << fps << endl;
+
+      //ROS_INFO("Taken time = %f", second);
+      //ROS_INFO("Left camera estimate frame rate = %f \n", fps);
+      //cout << /*"Taken time of right camera:" <<*/ second << endl;
+
+      cnt = 1;
+    }
 
   }
 
-  error_L = camera_L.StopCapture();
-  camera_L.Disconnect();
+  error = camera.StopCapture();
+  camera.Disconnect();
 
   return 0;
 }

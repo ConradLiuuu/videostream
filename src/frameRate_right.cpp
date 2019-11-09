@@ -14,38 +14,20 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-  if (argc != 2){
-    ROS_INFO("usage : rosrun videostream frameRate_eyes camera , camera:left or right");
-  }
-
-  ros::init(argc, argv, "frameRate_eyes", ros::init_options::AnonymousName);
+  ros::init(argc, argv, "frameRate_right");
   ros::NodeHandle nh;
-  ros::Publisher pub_frameRate;
-  ros::Publisher pub_cnt;
+  ros::Publisher pub_frameRate = nh.advertise<std_msgs::Float32>("frameRate_right",1,false);
+  //ros::Publisher pub_cnt = nh.advertise<std_msgs::UInt8>("count_right",1,false);
   ros::Rate rate(60);
   ros::Timer timer;
 
   image_transport::ImageTransport it(nh);
-  image_transport::Publisher pub;
+  image_transport::Publisher pub = it.advertise("right_camera",1);
   sensor_msgs::ImagePtr msg;
   std_msgs::Float32 frameRate;
   std_msgs::UInt8 count;
 
-  unsigned int SerialNumber;
-
-  string eye = argv[1];
-  if (eye == "left"){
-    SerialNumber = 17491073;
-    pub = it.advertise("left_camera",1);
-    pub_frameRate = nh.advertise<std_msgs::Float32>("frameRate_left",1,false);
-    pub_cnt = nh.advertise<std_msgs::UInt8>("count_left",1,false);
-  }
-  if (eye == "right"){
-    SerialNumber = 17491067;
-    pub = it.advertise("right_camera",1);
-    pub_frameRate = nh.advertise<std_msgs::Float32>("frameRate_right",1,false);
-    pub_cnt = nh.advertise<std_msgs::UInt8>("count_right",1,false);
-  }
+  unsigned int SerialNumber = 17491067;
 
   BusManager busMgr;
   Error error;
@@ -80,12 +62,7 @@ int main(int argc, char **argv)
   Property frmRate;
   frmRate.type = FRAME_RATE;
   error = camera.GetProperty(&frmRate);
-  if (eye == "left"){
-    cout << "Left camera setting frameRate = " << frmRate.absValue << endl;
-  }
-  if (eye == "right"){
-    cout << "Right camera setting frameRate = " << frmRate.absValue << endl;
-  }
+  ROS_INFO("Right camera setting frameRate = %f \n", frmRate.absValue);
 
   double second;
   double fps;
@@ -100,14 +77,9 @@ int main(int argc, char **argv)
     if (cnt == 1){
       startt = ros::Time::now().toSec();
     }
-/*
-    if (eye == "left"){
-      ROS_INFO("Left camera start capture image %d", cnt);
-    }
-    else {
-      ROS_INFO("Right camera start capture image %d", cnt);
-    }
-*/
+
+    //ROS_INFO("Right camera start capture image %d", cnt);
+    
     error = camera.RetrieveBuffer(&rawImage);
     rawImage.Convert(FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage);
     rowBytes = (double)bgrImage.GetReceivedDataSize() / (double)bgrImage.GetRows();
@@ -115,8 +87,8 @@ int main(int argc, char **argv)
 
     msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img).toImageMsg();
     pub.publish(msg);
-    count.data = cnt;
-    pub_cnt.publish(count);
+    //count.data = cnt;
+    //pub_cnt.publish(count);
     ros::spinOnce();
     rate.sleep();
     cnt += 1;
@@ -128,8 +100,10 @@ int main(int argc, char **argv)
       frameRate.data = fps;
       pub_frameRate.publish(frameRate);
 
+      cout << fps << endl;
+
       //ROS_INFO("Taken time = %f", second);
-      ROS_INFO("Estimate frame rate = %f \n", fps);
+      //ROS_INFO("Right camera estimate frame rate = %f \n", fps);
       //cout << /*"Taken time of right camera:" <<*/ second << endl;
 
       cnt = 1;

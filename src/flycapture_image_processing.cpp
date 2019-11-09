@@ -137,6 +137,7 @@ int main(int argc, char **argv)
   cv::Mat element;
 
   // capture loop
+  ROS_INFO("Start to do image process");
   while (ros::ok()){
     // get buffer data and write to flycapture iamge
     err_L = camera_L.RetrieveBuffer(&rawImage_L);
@@ -146,28 +147,32 @@ int main(int argc, char **argv)
     // convert image format from flycapture format to OpenCV format
     img_L = cv::Mat(bgrImage_L.GetRows(), bgrImage_L.GetCols(), CV_8UC3, bgrImage_L.GetData(), rowBytes_L);
 
+    msg_left = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_L).toImageMsg();
+    pub_left.publish(msg_left);
+
     // doing threshold
-    thre_start = clock();
+    //thre_start = clock();
     cv::cvtColor(img_L, img_L, CV_BGR2HSV);
     cv::inRange(img_L, cv::Scalar(H_min_L, S_min_L, V_min_L), cv::Scalar(H_max_L, S_max_L, V_max_L), img_L_binary);
 
-    opening_start = clock();
+    //opening_start = clock();
     //seconds = (double) difftime(opening_start, thre_start) / CLOCKS_PER_SEC;
     //cout << "Threshold processing takes " << seconds << " sec" << endl;
 
     // Open processing
-    nh.getParam("/proc_opening", proc_opening);
+    nh.getParam("/dynamic_bool/proc_opening", proc_opening);
     if (proc_opening == true){
+      //cout << "opening is true" << endl;
       element = cv::getStructuringElement(morph_elem, cv::Size(2*morph_size + 1, 2*morph_size+1), cv::Point(morph_size, morph_size));
       cv::morphologyEx(img_L_binary, img_L_binary, 2, element);
       //cv::imshow("image left after open", img_L_binary);
     }
-    opening_end = clock();
-    seconds = (double) difftime(opening_end, opening_start) / CLOCKS_PER_SEC;
+    //opening_end = clock();
+    //seconds = (double) difftime(opening_end, opening_start) / CLOCKS_PER_SEC;
     //cout << seconds << endl;
     //cout << "Open process takes " << seconds << " sec" << endl;
 
-    nh.getParam("/proc_dilate", proc_dilate);
+    nh.getParam("/dynamic_bool/proc_dilate", proc_dilate);
     if (proc_dilate == true){
       dilate(img_L_binary, img_L_binary, element);
     }
@@ -189,8 +194,8 @@ int main(int argc, char **argv)
       }
     }
 
-    contour_timer_end = clock();
-    seconds = (double) difftime(contour_timer_end, contour_timer_start) / CLOCKS_PER_SEC;
+    //contour_timer_end = clock();
+    //seconds = (double) difftime(contour_timer_end, contour_timer_start) / CLOCKS_PER_SEC;
     //cout << "Select contours takes " << seconds << " sec" << endl;
     // release vectors
     contours.clear();
