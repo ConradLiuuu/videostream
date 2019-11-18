@@ -5,6 +5,7 @@ if cap.isOpened() == 0:
     print("camera not open")
     
 while True:
+    print("aa")
     ret, frame = cap.read()
     #cv2.namedWindow("imgae", 0)
     cv2.imshow("imgae",frame)

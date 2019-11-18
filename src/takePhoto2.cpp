@@ -1,15 +1,39 @@
 #include "FlyCapture2.h"
 #include <opencv2/opencv.hpp>
+#include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
+#include <sensor_msgs/image_encodings.h>
 #include <iostream>
-//#include <ros/ros.h>
+#include <ros/ros.h>
+#include <std_msgs/Bool.h>
+#include <thread>
 
 using namespace FlyCapture2;
 using namespace std;
 
+cv::Mat img_L, img_R;
+
+std::string path = "/home/lab606a/pic/";
+std::string fileName_L;
+std::string baseName_L = "left_sample";
+std::string fileName_R;
+std::string baseName_R = "right_sample";
+std::string num;
+int serial = 1;
+
+void callback(const std_msgs::Bool::ConstPtr& msg);
+void func();
+
 int main(int argc, char **argv)
 {
-  //ros::init(argc, argv, "takePhoto");
-  //ros::NodeHandle nh;
+  ros::init(argc, argv, "takePhoto2");
+  ros::NodeHandle nh;
+  ros::Rate rate(60);
+
+  image_transport::ImageTransport it(nh);
+  image_transport::Publisher pub_left = it.advertise("left_camera",1);
+  image_transport::Publisher pub_right = it.advertise("right_camera",1);
+  sensor_msgs::ImagePtr msg_left, msg_right;
 
   BusManager busMgr;
 
@@ -81,7 +105,6 @@ int main(int argc, char **argv)
   }
 
   // capture loop
-  cv::Mat img_L, img_R;
 
   Image rawImage_L;
   Image bgrImage_L;
@@ -94,22 +117,13 @@ int main(int argc, char **argv)
   Error err_L;
   Error err_R;
 
-  char key = 0;
-  char save = 0;
+  thread t1(func);
 
-  std::string path = "/home/lab606a/pic/";
-  std::string fileName_L = "aa";
-  std::string baseName_L = "left_sample";
-  std::string fileName_R = "aa";
-  std::string baseName_R = "right_sample";
-  std::string num;
-  int serial = 1;
+  //char key = 0;
+  //char save = 0;
 
-  vector<int> compression_params;
-  compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-
-  while (key != 'q'){
-  //while (ros::ok()){
+  //while (key != 'q'){
+  while (ros::ok()){
     // Get image
     Error err_L = camera_L.RetrieveBuffer(&rawImage_L);
     Error err_R = camera_R.RetrieveBuffer(&rawImage_R);
@@ -129,10 +143,18 @@ int main(int argc, char **argv)
 
     // Conver to OpenCV Mat
     rowBytes_L = (double)bgrImage_L.GetReceivedDataSize() / (double)bgrImage_L.GetRows();
-    img_L = cv::Mat(bgrImage_L.GetRows(), bgrImage_L.GetCols(), CV_8UC3, bgrImage_L.GetData(), rowBytes_L);
+    img_R = cv::Mat(bgrImage_L.GetRows(), bgrImage_L.GetCols(), CV_8UC3, bgrImage_L.GetData(), rowBytes_L);
+    msg_left = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_R).toImageMsg();
     rowBytes_R = (double)bgrImage_R.GetReceivedDataSize() / (double)bgrImage_R.GetRows();
-    img_R = cv::Mat(bgrImage_R.GetRows(), bgrImage_R.GetCols(), CV_8UC3, bgrImage_R.GetData(), rowBytes_R);
+    img_L = cv::Mat(bgrImage_R.GetRows(), bgrImage_R.GetCols(), CV_8UC3, bgrImage_R.GetData(), rowBytes_R);
+    msg_right = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_L).toImageMsg();
 
+    pub_left.publish(msg_left);
+    pub_right.publish(msg_right);
+
+    rate.sleep();
+    ros::spinOnce();
+    /*
     cv::namedWindow("image left", 0);
     cv::imshow("image left", img_L);
     cv::namedWindow("image right", 0);
@@ -151,9 +173,33 @@ int main(int argc, char **argv)
     
     key = cv::waitKey(1);
     save = cv::waitKey(1);
+    */
   }
+
+  t1.join();
 
   camera_L.Disconnect();
 
   return 0;
+}
+
+void callback(const std_msgs::Bool::ConstPtr& msg){
+  vector<int> compression_params;
+  compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+  if (msg->data == true){
+    num = std::to_string(serial);
+    fileName_L = path + baseName_L + num + ".jpg";
+    fileName_R = path + baseName_R + num + ".jpg";
+    cv::imwrite(fileName_L, img_L, compression_params);
+    cout << "Save left camera image:" << fileName_L << endl;
+    cv::imwrite(fileName_R, img_R, compression_params);
+    cout << "Save right camera image:" << fileName_R << endl;
+    serial += 1;
+  }
+}
+
+void func(){
+  ros::NodeHandle n;
+  ros::Subscriber sub = n.subscribe("takephoto", 1, callback);
+  ros::spin();
 }

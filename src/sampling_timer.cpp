@@ -43,7 +43,7 @@ private:
 public:
   Talker()
   {
-    freq_pub = 3;
+    freq_pub = 30;
     msg.data = true;
     //ros::Rate rate(10);
     chatter = nh.advertise<std_msgs::Bool>("/sampling_time", 1);

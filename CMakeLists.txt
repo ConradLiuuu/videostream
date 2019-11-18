@@ -149,6 +149,7 @@ add_executable(eyes_HSV_reconfigure src/eyes_HSV_reconfigure.cpp)
 add_executable(flycapture_findball src/flycapture_findball.cpp)
 add_executable(fps src/fps.cpp)
 add_executable(takePhoto src/takePhoto.cpp)
+add_executable(takePhoto2 src/takePhoto2.cpp)
 add_executable(findcontour src/findcontour.cpp)
 add_executable(frameRate src/frameRate.cpp)
 add_executable(frameRate_right src/frameRate_right.cpp)
@@ -167,6 +168,8 @@ add_executable(image_process_test src/image_process_test.cpp)
 add_executable(thread_oop_test src/thread_oop_test.cpp)
 add_executable(thread_left src/thread_left.cpp)
 add_executable(thread_right src/thread_right.cpp)
+add_executable(stereo src/stereo.cpp)
+add_executable(stereo_oop src/stereo_oop.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -201,6 +204,15 @@ target_link_libraries(object_detect
     ${OpenCV_LIBS}
     ${catkin_LIBRARIES}
 )
+target_link_libraries(stereo
+    ${OpenCV_LIBS}
+    ${catkin_LIBRARIES}
+)
+target_link_libraries(stereo_oop
+    ${OpenCV_LIBS}
+    ${catkin_LIBRARIES}
+)
+
 target_link_libraries(flycapture ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 target_link_libraries(ros_flycapture ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
@@ -214,6 +226,8 @@ target_link_libraries(flycapture_findball ${OpenCV_LIBS} ${catkin_LIBRARIES} -L.
 target_link_libraries(fps ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 target_link_libraries(takePhoto ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(takePhoto2 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 target_link_libraries(findcontour ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
