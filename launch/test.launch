@@ -1,0 +1,4 @@
+<launch>
+    <node name="thread_left20191127" pkg="videostream" type="thread_left20191127" output="screen"/>
+    <node name="thread_right20191127" pkg="videostream" type="thread_right20191127" output="screen"/>
+</launch>
