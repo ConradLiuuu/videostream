@@ -62,6 +62,7 @@ private:
 
   // variable setting
   unsigned int cnt, cnt_proc;
+  unsigned int cnt_img;
   double startt, endd, startt_proc, endd_proc;
   double second, fps, second_proc, fps_proc;
 
@@ -97,6 +98,7 @@ public:
 
     cnt = 1;
     cnt_proc = 1;
+    //cnt_img = 0;
     morph_elem = 0;
     morph_size = 1;
     //compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
@@ -109,7 +111,7 @@ public:
     radius = 5;
 
     center_int_type = cv::Point2i(0,0);
-    center_last = cv::Point2i(100,100);
+    center_last = cv::Point2i(200,100);
     T_one2ori = cv::Point2i(960,35);
 
     nh.getParam("/dynamic_HSV_server/H_min_L", H_min);
@@ -193,17 +195,18 @@ public:
     //ROS_INFO("Right camera start to do image process %d", cnt_proc);
     error = camera.RetrieveBuffer(&rawImage);
     ROS_INFO("Right camera start to do image process %d", cnt_proc);
+    num = ros::Time::now().toSec();
     rawImage.Convert(FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage);
     rowBytes = (double)bgrImage.GetReceivedDataSize() / (double)bgrImage.GetRows();
     img = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(), rowBytes);
     //img2 = img.clone();
-
+    //ROS_INFO("Right camera start to do image process %d", cnt_proc);
 
     //num = std::to_string(ros::Time::now().toSec());
-    num = ros::Time::now().toSec();
+    /*
     fileName_L = path + baseName_L + std::to_string(cnt_proc) + "_" + std::to_string(num) + ".jpg";
     cv::imwrite(fileName_L, img, compression_params);
-
+    */
 
     //startt_proc = ros::Time::now().toSec();
 
@@ -224,7 +227,94 @@ public:
       //cout << img_serve.cols << ", " << img_serve.rows << endl;
     }
     else {
-      if ((center_int_type.x >0) /*&& (center_in_world_frame.x < 1848)*/ && (center_int_type.y > 0) && (center_in_world_frame.y < 1286)){
+      if ((center_in_world_frame.x > 0) && (center_in_world_frame.x < 1848) && (center_in_world_frame.y > 0) && (center_in_world_frame.y < 1400)){
+      //if ((center_in_world_frame.x >=0) && (center_in_world_frame.x < 1848) && (center_in_world_frame.y >= 0) && (center_in_world_frame.y < 1336)){
+        /*if (img_serve.cols == 640){
+          //T_two2one = center_int_type - center_last;
+
+          //center_in_world_frame = center_last + T_two2one + T_one2ori;
+          //cout << "left center640 = " << center_in_world_frame << endl;
+
+          img_x = center_in_world_frame.x - 200;
+          img_y = center_in_world_frame.y - 200;
+          //img_serve = img(cv::Rect(img_x, img_y, 400, 400));
+        }*/
+        if (img_serve.cols == 400){
+          //delta = delta + (center_int_type - center_last);
+          //center_in_world_frame = center_last + T_two2one + T_one2ori + delta;
+          //cout << "left center = " << center_in_world_frame << endl;
+          if ((center_in_world_frame.y-100) < 0){
+            img_x = center_in_world_frame.x - 200;
+            img_y = 0;
+            img_serve = img(cv::Rect(img_x, img_y, 400, 400));
+          }
+          else{
+            //img_x = center_in_world_frame.x - 200;
+            //img_y = center_in_world_frame.y - 200;
+            //img_serve = img(cv::Rect(img_x, img_y, 400, 400));
+            if ((center_in_world_frame.y+300) > 1536){
+              img_x = center_in_world_frame.x - 200;
+              img_y = center_in_world_frame.y - 100;
+              //img_serve = img(cv::Rect(img_x, img_y, 400, 400));
+              img_serve = img(cv::Rect(img_x, img_y, 400, (1535-img_y)));
+            }
+            else{
+              if ((center_in_world_frame.x-200) < 0){
+                img_x = 0;
+                img_y = center_in_world_frame.y - 100;
+                img_serve = img(cv::Rect(img_x, img_y, 400, 400));
+              }
+              else{
+                if ((center_in_world_frame.x+200) > 2048){
+                  img_x = center_in_world_frame.x - 200;
+                  img_y = center_in_world_frame.y - 100;
+                  img_serve = img(cv::Rect(img_x, img_y, (2048-img_x), img_y));
+                }
+                else{
+                  img_x = center_in_world_frame.x - 200;
+                  img_y = center_in_world_frame.y - 100;
+                  img_serve = img(cv::Rect(img_x, img_y, 400, 400));
+                }
+              }
+            }
+          }
+
+
+          //img_serve = img(cv::Rect(img_x, img_y, 400, 400));
+        }
+        if (img_serve.cols == 640){
+          if ((center_in_world_frame.y-100) >= 0){
+            img_x = center_in_world_frame.x - 200;
+            img_y = center_in_world_frame.y - 100;
+            img_serve = img(cv::Rect(img_x, img_y, 400, 400));
+          }
+          else{
+            img_x = center_in_world_frame.x - 200;
+            img_y = 0;
+            img_serve = img(cv::Rect(img_x, img_y, 400, 400));
+          }
+        }
+
+        //img_serve = img(cv::Rect(img_x, img_y, 400, 400));
+      }
+      else {
+        img_serve = img(cv::Rect(T_one2ori.x, T_one2ori.y, 640, 240));
+        delta = cv::Point2i(0,0);
+        center_int_type = cv::Point2i(0,0);
+        center = cv::Point2f(0,0);
+        center_in_world_frame = cv::Point2i(-1,-1);
+        /*
+        ball_center.data.push_back(cnt_proc);
+        ball_center.data.push_back(center_in_world_frame.x);
+        ball_center.data.push_back(center_in_world_frame.y);
+        pub_center.publish(ball_center);
+        ball_center.data.clear();
+        */
+      }
+    }
+    /*
+    else {
+      if ((center_int_type.x >0) && (center_in_world_frame.x < 1848) && (center_int_type.y > 0) && (center_in_world_frame.y < 1286)){
       //if ((center_in_world_frame.x >=0) && (center_in_world_frame.x < 1848) && (center_in_world_frame.y >= 0) && (center_in_world_frame.y < 1336)){
         if (img_serve.cols == 640){
           //T_two2one = center_int_type - center_last;
@@ -253,7 +343,7 @@ public:
         center_in_world_frame = cv::Point2f(-1,-1);
       }
     }
-
+*/
     msg_ROI = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_serve).toImageMsg();
     pub_ROI.publish(msg_ROI);
 
@@ -268,11 +358,11 @@ public:
       pub_ROI.publish(msg_ROI);
     }
 */
-/*
-    num = std::to_string(ros::Time::now().toSec());
-    fileName_L = path + baseName_L + std::to_string(cnt_proc) + "_" + num + ".jpg";
-    cv::imwrite(fileName_L, img, compression_params);
-*/
+
+    //num = std::to_string(ros::Time::now().toSec());
+    //fileName_L = path + baseName_L + std::to_string(cnt_proc) + "_" + std::to_string(num) + ".jpg";
+    //cv::imwrite(fileName_L, img, compression_params);
+
     cv::cvtColor(img_serve, img_hsv, CV_BGR2HSV);
     cv::inRange(img_hsv, cv::Scalar(H_min, S_min, V_min), cv::Scalar(H_max, S_max, V_max), img_binary);
 
@@ -306,14 +396,16 @@ public:
       center_int_type.y = (int)center.y;
       //cout << "center = " << center.x << "," << center.y << endl;
 
-      if ((center_int_type.x >0) /*&& (center_in_world_frame.x < 1848)*/ && (center_int_type.y > 0) && (center_in_world_frame.y < 1286)){
-      //if ((center_in_world_frame.x >=0) && (center_in_world_frame.x < 1848) && (center_in_world_frame.y >= 0) && (center_in_world_frame.y < 1336)){
+      if ((center_int_type.x >0) /*&& (center_in_world_frame.x < 1848)*/ && (center_int_type.y > 0) && (center_in_world_frame.y < 1400)){
+        //fileName_L = path + baseName_L + std::to_string(cnt_proc) + "_" + std::to_string(num) + ".jpg";
+        //cv::imwrite(fileName_L, img, compression_params);
+
         if (img_serve.cols == 640){
           T_two2one = center_int_type - center_last;
           center_in_world_frame = center_last + T_two2one + T_one2ori;
           cout << "right center640 = " << center_in_world_frame << endl;
         }
-        if (img_serve.cols == 200){
+        if (img_serve.cols == 400){
           delta = delta + (center_int_type - center_last);
           center_in_world_frame = center_last + T_two2one + T_one2ori + delta;
           cout << "right center = " << center_in_world_frame << endl;
@@ -331,6 +423,7 @@ public:
         center_int_type = cv::Point2i(0,0);
         center = cv::Point2f(0,0);
         center_in_world_frame = cv::Point2i(-1,-1);
+        cnt_img = 0;
         /*
         ball_center.data.push_back(cnt_proc);
         ball_center.data.push_back(center_in_world_frame.x);
@@ -354,6 +447,7 @@ public:
     pub_binary.publish(msg_binary);
 
     cnt_proc += 1;
+    //cnt_img += 1;
 
     endd_proc = ros::Time::now().toSec();
     second_proc = endd_proc - startt_proc;
