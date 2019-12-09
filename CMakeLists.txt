@@ -170,6 +170,15 @@ add_executable(thread_left src/thread_left.cpp)
 add_executable(thread_right src/thread_right.cpp)
 add_executable(stereo src/stereo.cpp)
 add_executable(stereo_oop src/stereo_oop.cpp)
+add_executable(thread_left20191125 src/thread_left20191125.cpp)
+add_executable(thread_right20191125 src/thread_right20191125.cpp)
+add_executable(thread_oop20191126 src/thread_oop20191126.cpp)
+add_executable(thread_left20191127 src/thread_left20191127.cpp)
+add_executable(thread_right20191127 src/thread_right20191127.cpp)
+add_executable(thread_left20191129 src/thread_left20191129.cpp)
+add_executable(thread_right20191129 src/thread_right20191129.cpp)
+add_executable(thread_left20191203 src/thread_left20191203.cpp)
+add_executable(thread_right20191203 src/thread_right20191203.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -264,6 +273,24 @@ target_link_libraries(thread_oop_test ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../..
 target_link_libraries(thread_left ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 target_link_libraries(thread_right ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_left20191125 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_right20191125 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_oop20191126 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_left20191127 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_right20191127 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_left20191129 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_right20191129 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_left20191203 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_right20191203 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 #############
 ## Install ##

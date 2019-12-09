@@ -48,47 +48,37 @@ public:
     //ros::Rate rate(10);
     chatter = nh.advertise<std_msgs::Bool>("/sampling_time", 1);
     timer_bool = nh.createTimer(ros::Duration(1.0 / freq_pub),std::bind(&Talker::pub_bool, this));
-/*
-    ROS_INFO("Published trigger sign");
-    for (int i = 0; i < 5; i++){
-      chatter.publish(msg);
-      //ROS_INFO("Published trigger sign");
-      rate.sleep();
-    }
-    //ROS_INFO("Published trigger sign");
-
-    pub_bool();*/
   }
 
   void pub_bool()
   {
     chatter.publish(msg);
-    //ROS_INFO("Publishe loop");
-/*
-    while(ros::ok()){
-      sub_left = nh.subscribe("/left_camera_done", 1, &Talker::callback_left, this);
-      spinOnce();
-      sub_right = nh.subscribe("/right_camera_done", 1, &Talker::callback_right, this);
-      spinOnce();
-      //sub_left = nh.subscribe("/left_camera_done", 1, &Talker::callback_left, this);
-      if (left_isDone == true && right_isDone == true){
-        //ROS_INFO("sub both two");
-        chatter.publish(msg);
-      }
-    }
-*/
   }
 
-  void callback_left(const std_msgs::Bool::ConstPtr& msg_left)
+};
+class Takephoto
+{
+private:
+  NodeHandle nh;
+  Publisher chatter;
+  Subscriber sub_left, sub_right;
+  Timer timer_bool;
+  std_msgs::Bool msg;
+
+  double freq_pub;
+public:
+  Takephoto()
   {
-    ROS_INFO("left called");
-    left_isDone = msg_left->data;
+    freq_pub = 121;
+    msg.data = true;
+    //ros::Rate rate(10);
+    chatter = nh.advertise<std_msgs::Bool>("/sampling_time_take_photo", 1);
+    timer_bool = nh.createTimer(ros::Duration(1.0 / freq_pub),std::bind(&Takephoto::pub_Takephoto, this));
   }
 
-  void callback_right(const std_msgs::Bool::ConstPtr& msg_right)
+  void pub_Takephoto()
   {
-    ROS_INFO("right called");
-    right_isDone = msg_right->data;
+    chatter.publish(msg);
   }
 
 };
@@ -96,6 +86,7 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "sampling_timer");
   Talker talker;
+  Takephoto takephoto;
   spin();
   return 0;
 }

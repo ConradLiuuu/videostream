@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include <std_msgs/Float64MultiArray.h>
+#include <std_msgs/Int64MultiArray.h>
 #include <iostream>
 #include <math.h>
 #include <thread>
@@ -17,8 +17,13 @@ double u0_R = 1055.03490, v0_R = 775.48461; // principal point
 double kc_R[8] = {-0.00240554144590306, 0.00415861668132687, 0.00124996506239818, 0.000930166885290533, 0.00202439715420488, -0.00351884072634534, -0.000806762468456028, -0.000668423449138214};
 
 //double a = 0,b = 0, c = 0, dd = 0;
-double dis_Ix_L, dis_Iy_L, dis_Ix_R, dis_Iy_R;
+int dis_Ix_L = -1, dis_Iy_L = -1, dis_Ix_R = -1, dis_Iy_R = -1;
 double Ix_L, Iy_L, Ix_R, Iy_R;
+//int ID_L, ID_R;
+int ID_L = 0, ID_R = 0;
+int id_L, id_R;
+bool isDone = true;
+int bound = -26;
 
 class Sub_ball_center
 {
@@ -38,24 +43,46 @@ public:
     ros::spin();
   }
 
-  void callback_left(const std_msgs::Float64MultiArray::ConstPtr& msg_left)
+  void callback_left(const std_msgs::Int64MultiArray::ConstPtr& msg_left)
   {
-    dis_Ix_L = msg_left->data[0];
-    dis_Iy_L = msg_left->data[1];
+    if ((msg_left->data[1] >= 0) && (msg_left->data[2] >= 0)){
+      ID_L = msg_left->data[0];
+      dis_Ix_L = msg_left->data[1];
+      dis_Iy_L = msg_left->data[2];
+      //cout << "ID_L = " << ID_L << endl;
+      //isDone = false;
+    }
+    else {
+      ID_L = 0;
+      dis_Ix_L = -1;
+      dis_Iy_L = -1;
+    }
+
     //cout << "dis_Ix_L = " << dis_Ix_L << endl;
     //cout << "dis_Iy_L = " << dis_Iy_L << endl;
   }
 
-  void callback_right(const std_msgs::Float64MultiArray::ConstPtr& msg_right)
+  void callback_right(const std_msgs::Int64MultiArray::ConstPtr& msg_right)
   {
-    dis_Ix_R = msg_right->data[0];
-    dis_Iy_R = msg_right->data[1];
+    if ((msg_right->data[1] >= 0) && (msg_right->data[2] >= 0)){
+      ID_R = msg_right->data[0];
+      dis_Ix_R = msg_right->data[1];
+      dis_Iy_R = msg_right->data[2];
+      //cout << "ID_R = " << ID_R << endl;
+      //isDone = false;
+    }
+    else{
+      ID_R = -1;
+      dis_Ix_R = -1;
+      dis_Iy_R = -1;
+    }
+
     //cout << "dis_Ix_R = " << dis_Ix_R << endl;
     //cout << "dis_Iy_R = " << dis_Iy_R << endl;
   }
 };
 
-void correction_img(string camera, double dis_Ix, double dis_Iy, double fu, double fv, double u0, double v0, double kc[8])
+void correction_img(string camera, int dis_Ix, int dis_Iy, double fu, double fv, double u0, double v0, double kc[8])
 {
   double dis_hxz, dis_hyz, rd ,G, hxz, hyz;
 
@@ -130,33 +157,99 @@ void tt(){
   double hx_W, hy_W, hz_W;
   double dif_L2W[3] = {0};
 
+  double y1;
+  double y2 = 0;
+  int diff = 0;
+
   while (ros::ok()) {
     //ROS_INFO("dis_Ix_L = %f, dis_Iy_L = %f \n", a,b);
     //ROS_INFO("dis_Ix_R = %f, dis_Iy_R = %f \n", c,dd);
-    correction_img(camera_L, dis_Ix_L, dis_Iy_L, fu_L, fv_L, u0_L, v0_L, kc_L);
-    correction_img(camera_R, dis_Ix_R, dis_Iy_R, fu_R, fv_R, u0_R, v0_R, kc_R);
+    //cout << dis_Ix_L << "," << dis_Iy_L << "|" << dis_Ix_R << "," << dis_Iy_R << endl;
+    //cout << "ID_L = " << ID_L  << ", ID_R = " << ID_R << endl;
 
-    // calcuate k
-    double k = ((R_R2L[0][0]*(Ix_L-u0_L)/fu_L) + (R_R2L[0][1]*(Iy_L-v0_L)/fv_L) + R_R2L[0][2]) - ((Ix_R-u0_R)/fu_R)*((R_R2L[2][0]*(Ix_L-u0_L)/fu_L) + (R_R2L[2][1]*(Iy_L-v0_L)/fv_L) + R_R2L[2][2]);
+    //diff = ID_L - ID_R;
+    id_L = ID_L;
+    id_R = ID_R;
 
-    // calculate left ray vector
-    hz_L = (d[0] - (d[2]*(Ix_R-u0_R)/fu_R)) / k;
-    hx_L = hz_L*(Ix_L-u0_L)/fu_L;
-    hy_L = hz_L*(Iy_L-v0_L)/fv_L;
+    if (id_L == id_R){
+      if ((dis_Ix_L >= 0) && (dis_Iy_L >= 0) && (dis_Ix_R >= 0) && (dis_Iy_R >= 0) && (ID_L == ID_R)){
+        correction_img(camera_L, dis_Ix_L, dis_Iy_L, fu_L, fv_L, u0_L, v0_L, kc_L);
+        correction_img(camera_R, dis_Ix_R, dis_Iy_R, fu_R, fv_R, u0_R, v0_R, kc_R);
 
-    dif_L2W[0] = hx_L-b_L2W[0];
-    dif_L2W[1] = hy_L-b_L2W[1];
-    dif_L2W[2] = hz_L-b_L2W[2];
+        // calcuate k
+        double k = ((R_R2L[0][0]*(Ix_L-u0_L)/fu_L) + (R_R2L[0][1]*(Iy_L-v0_L)/fv_L) + R_R2L[0][2]) - ((Ix_R-u0_R)/fu_R)*((R_R2L[2][0]*(Ix_L-u0_L)/fu_L) + (R_R2L[2][1]*(Iy_L-v0_L)/fv_L) + R_R2L[2][2]);
 
-    hx_W = R_W2L[0][0]*dif_L2W[0] + R_W2L[0][1]*dif_L2W[1] + R_W2L[0][2]*dif_L2W[2];
-    hy_W = R_W2L[1][0]*dif_L2W[0] + R_W2L[1][1]*dif_L2W[1] + R_W2L[1][2]*dif_L2W[2];
-    hz_W = R_W2L[2][0]*dif_L2W[0] + R_W2L[2][1]*dif_L2W[1] + R_W2L[2][2]*dif_L2W[2];
-    cout << "object position = [" << hx_W / 10 << "," << hy_W / 10 << "," << hz_W / 10 << "]" << endl;
+        // calculate left ray vector
+        hz_L = (d[0] - (d[2]*(Ix_R-u0_R)/fu_R)) / k;
+        hx_L = hz_L*(Ix_L-u0_L)/fu_L;
+        hy_L = hz_L*(Iy_L-v0_L)/fv_L;
 
-    hx_W = R_W2L[0][0] * dif_L2W[0] + R_W2L[0][1] * dif_L2W[1] + R_W2L[0][2] * dif_L2W[2] - 17.6031;
-    hy_W = R_W2L[1][0] * dif_L2W[0] + R_W2L[1][1] * dif_L2W[1] + R_W2L[1][2] * dif_L2W[2] - (-23.1113);
-    hz_W = R_W2L[2][0] * dif_L2W[0] + R_W2L[2][1] * dif_L2W[1] + R_W2L[2][2] * dif_L2W[2] - 18.5448 + 16;
-    cout << "correction position = [" << hx_W / 10 << "," << hy_W / 10 << "," << hz_W / 10 << "]" << endl;
+        dif_L2W[0] = hx_L-b_L2W[0];
+        dif_L2W[1] = hy_L-b_L2W[1];
+        dif_L2W[2] = hz_L-b_L2W[2];
+
+        hx_W = R_W2L[0][0]*dif_L2W[0] + R_W2L[0][1]*dif_L2W[1] + R_W2L[0][2]*dif_L2W[2];
+        hy_W = R_W2L[1][0]*dif_L2W[0] + R_W2L[1][1]*dif_L2W[1] + R_W2L[1][2]*dif_L2W[2];
+        hz_W = R_W2L[2][0]*dif_L2W[0] + R_W2L[2][1]*dif_L2W[1] + R_W2L[2][2]*dif_L2W[2];
+        //cout << "object position = [" << hx_W / 10 << "," << hy_W / 10 << "," << hz_W / 10 << "]" << endl;
+
+        hx_W = R_W2L[0][0] * dif_L2W[0] + R_W2L[0][1] * dif_L2W[1] + R_W2L[0][2] * dif_L2W[2] - 17.6031;
+        hy_W = R_W2L[1][0] * dif_L2W[0] + R_W2L[1][1] * dif_L2W[1] + R_W2L[1][2] * dif_L2W[2] - (-23.1113);
+        hz_W = R_W2L[2][0] * dif_L2W[0] + R_W2L[2][1] * dif_L2W[1] + R_W2L[2][2] * dif_L2W[2] - 18.5448 + 16;
+
+        y1 = hy_W;
+        //diff = y1-y2;
+        if ((y1 != y2) && (ID_L == ID_R )){
+          //ROS_INFO("ID_L = %d, ID_R = %d", ID_L, ID_R);
+          cout << "ID_L = " << ID_L  << ", ID_R = " << ID_R << endl;;
+          ROS_INFO("correction position = [%f, %f, %f]", hx_W / 10, hy_W / 10,hz_W / 10);
+          //cout << "correction position = [" << hx_W / 10 << "," << hy_W / 10 << "," << hz_W / 10 << "]" << endl;
+          y2 = y1;
+        }
+        isDone = true;
+      }
+
+    }
+
+/*
+    if ((dis_Ix_L >= 0) && (dis_Iy_L >= 0) && (dis_Ix_R >= 0) && (dis_Iy_R >= 0)){
+      correction_img(camera_L, dis_Ix_L, dis_Iy_L, fu_L, fv_L, u0_L, v0_L, kc_L);
+      correction_img(camera_R, dis_Ix_R, dis_Iy_R, fu_R, fv_R, u0_R, v0_R, kc_R);
+
+      // calcuate k
+      double k = ((R_R2L[0][0]*(Ix_L-u0_L)/fu_L) + (R_R2L[0][1]*(Iy_L-v0_L)/fv_L) + R_R2L[0][2]) - ((Ix_R-u0_R)/fu_R)*((R_R2L[2][0]*(Ix_L-u0_L)/fu_L) + (R_R2L[2][1]*(Iy_L-v0_L)/fv_L) + R_R2L[2][2]);
+
+      // calculate left ray vector
+      hz_L = (d[0] - (d[2]*(Ix_R-u0_R)/fu_R)) / k;
+      hx_L = hz_L*(Ix_L-u0_L)/fu_L;
+      hy_L = hz_L*(Iy_L-v0_L)/fv_L;
+
+      dif_L2W[0] = hx_L-b_L2W[0];
+      dif_L2W[1] = hy_L-b_L2W[1];
+      dif_L2W[2] = hz_L-b_L2W[2];
+
+      hx_W = R_W2L[0][0]*dif_L2W[0] + R_W2L[0][1]*dif_L2W[1] + R_W2L[0][2]*dif_L2W[2];
+      hy_W = R_W2L[1][0]*dif_L2W[0] + R_W2L[1][1]*dif_L2W[1] + R_W2L[1][2]*dif_L2W[2];
+      hz_W = R_W2L[2][0]*dif_L2W[0] + R_W2L[2][1]*dif_L2W[1] + R_W2L[2][2]*dif_L2W[2];
+      //cout << "object position = [" << hx_W / 10 << "," << hy_W / 10 << "," << hz_W / 10 << "]" << endl;
+
+      hx_W = R_W2L[0][0] * dif_L2W[0] + R_W2L[0][1] * dif_L2W[1] + R_W2L[0][2] * dif_L2W[2] - 17.6031;
+      hy_W = R_W2L[1][0] * dif_L2W[0] + R_W2L[1][1] * dif_L2W[1] + R_W2L[1][2] * dif_L2W[2] - (-23.1113);
+      hz_W = R_W2L[2][0] * dif_L2W[0] + R_W2L[2][1] * dif_L2W[1] + R_W2L[2][2] * dif_L2W[2] - 18.5448 + 16;
+
+      y1 = hy_W;
+      //diff = y1-y2;
+      if (y1 != y2){
+        cout << "ID_L = " << ID_L  << ", ID_R = " << ID_R << endl;;
+        cout << "correction position = [" << hx_W / 10 << "," << hy_W / 10 << "," << hz_W / 10 << "]" << endl;
+        y2 = y1;
+      }
+
+    }
+    */
+    /*else{
+      cout << "not found ball" << endl;
+    }*/
 
   }
 
