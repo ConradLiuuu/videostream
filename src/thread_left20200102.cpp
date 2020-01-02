@@ -32,13 +32,6 @@ private:
 
   // openCV setting
   cv::Mat img, img_hsv, img_binary, img_ROI, element, img_serve, img2;
-  int morph_elem;
-  int morph_size;
-
-  // vectors setup
-  vector<vector<cv::Point> > contours;
-  vector<cv::Vec4i> hierarchy;
-  vector<vector<cv::Point> > contour;
 
   cv::Point2f center;
   cv::Point2i center_int_type;
@@ -48,14 +41,18 @@ private:
   float radius;
   cv::Point2i top, buttom;
 
+  int morph_elem;
+  int morph_size;
+
+  // vectors setup
+  vector<vector<cv::Point> > contours;
+
   // ros setting
   ros::NodeHandle nh;
-  ros::Publisher pub_frameRate, pub_binary_frameRate, pub_center, pub_leftDone;
+  ros::Publisher pub_frameRate,pub_center;
   ros::Subscriber sub, sub2;
-  std_msgs::Float32 frameRate, binary_frameRate;
+  std_msgs::Float32 frameRate;
   std_msgs::Int64MultiArray ball_center;
-  std_msgs::Bool isDone;
-  ros::Timer timer;
 
   // image transport setting
   sensor_msgs::ImagePtr msg_img, msg_binary, msg_ROI;
@@ -63,22 +60,18 @@ private:
 
   // variable setting
   unsigned int cnt, cnt_proc;
-  double startt, endd, startt_proc, endd_proc;
-  double second, fps, second_proc, fps_proc;
-
+  double startt_proc, endd_proc, second_proc;
   int H_min, H_max, S_min, S_max, V_min, V_max;
-  bool proc_minEnclosingCircle, proc_opening, proc_dilate;
-  bool func;
-
   int img_x, img_y;
 
-public:
   std::string path = "/home/lab606a/dic/left/";
   std::string fileName_L;
   std::string baseName_L = "left";
 
   double num;
   vector<int> compression_params;
+
+public:
 
   Camera_(){
     SerialNumber = 17491073;
@@ -89,15 +82,12 @@ public:
     pub_ROI = it.advertise("left_camera_ROI",1);
 
     pub_frameRate = nh.advertise<std_msgs::Float32>("frameRate_left",1,false);
-    pub_binary_frameRate = nh.advertise<std_msgs::Float32>("image_processing_frameRate_left",1,false);
     pub_center = nh.advertise<std_msgs::Int64MultiArray>("ball_center_left", 1, false);
-    pub_leftDone = nh.advertise<std_msgs::Bool>("left_camera_done", 1, false);
 
-    cnt = 1;
     cnt_proc = 1;
     morph_elem = 0;
     morph_size = 1;
-    //compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+
     compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
     compression_params.push_back(50);
 
@@ -126,38 +116,19 @@ public:
 
     // start capture image
     error = camera.StartCapture();
-    sub2 = nh.subscribe("/sampling_time_take_photo", 1, &Camera_::callback2, this);
+    sub2 = nh.subscribe("/sampling_time_take_photo", 1, &Camera_::ShowImg, this);
   }
 
-  void callback2(const std_msgs::Bool::ConstPtr& msg){
-    /*
-    if (cnt == 1){
-      startt = ros::Time::now().toSec();
-    }
-    */
+  void ShowImg(const std_msgs::Bool::ConstPtr& msg){
     msg_img = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img2).toImageMsg();
     pub_img.publish(msg_img);
-    /*
-    cnt += 1;
-
-    if (cnt == (int)frmRate.absValue){
-      endd = ros::Time::now().toSec();
-      second = endd - startt;
-      fps = (double) frmRate.absValue / (second);
-      frameRate.data = fps;
-      //cout << fps << endl;
-      pub_frameRate.publish(frameRate);
-
-      cnt = 1;
-    }
-    */
   }
 
   void operator()(){
-    sub = nh.subscribe("/sampling_time", 1, &Camera_::callback, this);
+    sub = nh.subscribe("/sampling_time", 1, &Camera_::ImageProcessing, this);
   }
 
-  void callback(const std_msgs::Bool::ConstPtr& msg){
+  void ImageProcessing(const std_msgs::Bool::ConstPtr& msg){
     //startt_proc = ros::Time::now().toSec();
     error = camera.RetrieveBuffer(&rawImage);
     ROS_INFO("Left camera start to do image process %d", cnt_proc);
@@ -251,49 +222,47 @@ public:
     // minEnclosingCircle processing
     for (int i = 0; i < contours.size(); i++){
       double area = cv::contourArea(contours[i]);
-      if ((area > 100)/* && (radius >= 5) && (radius < 40)*/){
-        //cout << "left area = " << area << endl;
+      if ((area > 100)){
         cv::minEnclosingCircle(contours[i], center, radius);
       }
-      //cout << "left radius = " << radius << endl;
     }
     center_int_type.x = (int)center.x;
     center_int_type.y = (int)center.y;
 
-      if ((center_int_type.x >0) /*&& (center_in_world_frame.x < 1848)*/ && (center_int_type.y > 0) && (center_in_world_frame.y < 1400)){
-        //fileName_L = path + baseName_L + std::to_string(cnt_proc) + "_" + std::to_string(num) + ".jpg";
-        //cv::imwrite(fileName_L, img, compression_params);
-        if (img_serve.cols == 640){
-          T_two2one = center_int_type - center_last;
-          center_in_world_frame = center_last + T_two2one + T_one2ori;
-          cout << "left center640 = " << center_in_world_frame << endl;
-        }
-
-        if (img_serve.cols == 400){
-          delta = delta + (center_int_type - center_last);
-          center_in_world_frame = center_last + T_two2one + T_one2ori + delta;
-          cout << "left center = " << center_in_world_frame << endl;
-        }
-        top = center_in_world_frame-cv::Point2i(100,100);
-        buttom = center_in_world_frame+cv::Point2i(100,100);
-        img2 = img.clone();
-        cv::rectangle(img2, top, buttom, cv::Scalar(0,0,255), 3, 8, 0);
+    if ((center_int_type.x >0) && (center_int_type.y > 0) && (center_in_world_frame.y < 1400)){
+      /* save image */
+      //fileName_L = path + baseName_L + std::to_string(cnt_proc) + "_" + std::to_string(num) + ".jpg";
+      //cv::imwrite(fileName_L, img, compression_params);
+      if (img_serve.cols == 640){
+        T_two2one = center_int_type - center_last;
+        center_in_world_frame = center_last + T_two2one + T_one2ori;
+        cout << "left center640 = " << center_in_world_frame << endl;
       }
-      else {
-        delta = cv::Point2i(0,0);
-        center_int_type = cv::Point2i(0,0);
-        center = cv::Point2f(0,0);
-        center_in_world_frame = cv::Point2i(-1,-1);
-        img2 = img.clone();
-      }
-      ball_center.data.push_back(cnt_proc);
-      ball_center.data.push_back(center_in_world_frame.x);
-      ball_center.data.push_back(center_in_world_frame.y);
-      pub_center.publish(ball_center);
-      ball_center.data.clear();
 
-      contours.clear();
-      hierarchy.clear();
+      if (img_serve.cols == 400){
+        delta = delta + (center_int_type - center_last);
+        center_in_world_frame = center_last + T_two2one + T_one2ori + delta;
+        cout << "left center = " << center_in_world_frame << endl;
+      }
+      top = center_in_world_frame-cv::Point2i(200,200);
+      buttom = center_in_world_frame+cv::Point2i(200,200);
+      img2 = img.clone();
+      cv::rectangle(img2, top, buttom, cv::Scalar(0,0,255), 3, 8, 0);
+    }
+    else {
+      delta = cv::Point2i(0,0);
+      center_int_type = cv::Point2i(0,0);
+      center = cv::Point2f(0,0);
+      center_in_world_frame = cv::Point2i(-1,-1);
+      img2 = img.clone();
+    }
+    ball_center.data.push_back(cnt_proc);
+    ball_center.data.push_back(center_in_world_frame.x);
+    ball_center.data.push_back(center_in_world_frame.y);
+    pub_center.publish(ball_center);
+    ball_center.data.clear();
+
+    contours.clear();
 
     //msg_binary = cv_bridge::CvImage(std_msgs::Header(), "mono8", img_binary).toImageMsg();
     //pub_binary.publish(msg_binary);
