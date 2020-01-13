@@ -135,7 +135,7 @@ public:
   }
 
   void ImageProcessing(const std_msgs::Bool::ConstPtr& msg){
-    startt_proc = ros::Time::now().toSec();
+    //startt_proc = ros::Time::now().toSec();
     error = camera.RetrieveBuffer(&rawImage);
     ROS_INFO("Left camera start to do image process %d", cnt_proc);
     num = ros::Time::now().toSec();
@@ -275,9 +275,9 @@ public:
   
     cnt_proc += 1;
 
-    endd_proc = ros::Time::now().toSec();
-    second_proc = endd_proc - startt_proc;
-    cout << "left processing time = " << second_proc << endl;
+    //endd_proc = ros::Time::now().toSec();
+    //second_proc = endd_proc - startt_proc;
+    //cout << "left processing time = " << second_proc << endl;
     //cout << second_proc << endl;
   }
 
