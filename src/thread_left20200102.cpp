@@ -119,6 +119,12 @@ public:
     sub2 = nh.subscribe("/sampling_time_take_photo", 1, &Camera_::ShowImg, this);
   }
 
+  ~Camera_(){
+    cout << "close left camera" << endl;
+    error = camera.StopCapture();
+    camera.Disconnect();
+  }
+
   void ShowImg(const std_msgs::Bool::ConstPtr& msg){
     msg_img = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img2).toImageMsg();
     pub_img.publish(msg_img);
@@ -129,7 +135,7 @@ public:
   }
 
   void ImageProcessing(const std_msgs::Bool::ConstPtr& msg){
-    //startt_proc = ros::Time::now().toSec();
+    startt_proc = ros::Time::now().toSec();
     error = camera.RetrieveBuffer(&rawImage);
     ROS_INFO("Left camera start to do image process %d", cnt_proc);
     num = ros::Time::now().toSec();
@@ -269,9 +275,9 @@ public:
   
     cnt_proc += 1;
 
-    //endd_proc = ros::Time::now().toSec();
-    //second_proc = endd_proc - startt_proc;
-    //cout << "left processing time = " << second_proc << endl;
+    endd_proc = ros::Time::now().toSec();
+    second_proc = endd_proc - startt_proc;
+    cout << "left processing time = " << second_proc << endl;
     //cout << second_proc << endl;
   }
 
@@ -298,9 +304,11 @@ int main(int argc, char** argv)
     std::cerr << "Error calling pthread_setaffinity_np: " << rc << "\n";
   }
 */
-  t1.join();
+  //t1.join();
 
   ros::spin();
+
+  t1.join();
 
   return 0;
 }
