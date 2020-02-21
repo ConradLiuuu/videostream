@@ -150,7 +150,7 @@ add_executable(flycapture_findball src/flycapture_findball.cpp)
 add_executable(fps src/fps.cpp)
 add_executable(takePhoto src/takePhoto.cpp)
 add_executable(takePhoto2 src/takePhoto2.cpp)
-add_executable(findcontour src/findcontour.cpp)
+add_executable(findcontour2020 src/findcontour2020.cpp)
 add_executable(frameRate src/frameRate.cpp)
 add_executable(frameRate_right src/frameRate_right.cpp)
 add_executable(flycapture_image_processing src/flycapture_image_processing.cpp)
@@ -179,6 +179,15 @@ add_executable(thread_left20191129 src/thread_left20191129.cpp)
 add_executable(thread_right20191129 src/thread_right20191129.cpp)
 add_executable(thread_left20191203 src/thread_left20191203.cpp)
 add_executable(thread_right20191203 src/thread_right20191203.cpp)
+add_executable(thread_left20191209 src/thread_left20191209.cpp)
+add_executable(thread_right20191209 src/thread_right20191209.cpp)
+#add_executable(record_video src/record_video.cpp)
+add_executable(thread_left20200102 src/thread_left20200102.cpp)
+add_executable(thread_right20200102 src/thread_right20200102.cpp)
+add_executable(thread_left20200211 src/thread_left20200211.cpp)
+add_executable(thread_right20200211 src/thread_right20200211.cpp)
+add_executable(thread_left20200218 src/thread_left20200218.cpp)
+add_executable(thread_right20200218 src/thread_right20200218.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -238,7 +247,7 @@ target_link_libraries(takePhoto ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -
 
 target_link_libraries(takePhoto2 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
-target_link_libraries(findcontour ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+target_link_libraries(findcontour2020 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 target_link_libraries(frameRate ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
@@ -291,6 +300,24 @@ target_link_libraries(thread_right20191129 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L
 target_link_libraries(thread_left20191203 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 target_link_libraries(thread_right20191203 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_left20191209 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_right20191209 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_left20200102 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_right20200102 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_left20200211 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_right20200211 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_left20200218 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_right20200218 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+#target_link_libraries(record_video ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 #############
 ## Install ##
