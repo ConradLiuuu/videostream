@@ -214,6 +214,10 @@ public:
     rowBytes = (double)bgrImage.GetReceivedDataSize() / (double)bgrImage.GetRows();
     img = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(), rowBytes);
 
+    // Save image
+    //fileName_L = path + baseName_L + std::to_string(cnt_proc) + "_" + std::to_string(num) + ".jpg";
+    //cv::imwrite(fileName_L, img, compression_params);
+
     if ((center_int_type.x == 0) && (center_int_type.y == 0)){
       img_x = T_one2ori.x;
       img_y = T_one2ori.y;
@@ -310,6 +314,7 @@ public:
     dilate(img_binary, img_binary, element);
 
     cv::findContours(img_binary, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+    //cout << contours.size() << endl;
 
     // minEnclosingCircle processing
     for (int i = 0; i < contours.size(); i++){
@@ -359,8 +364,8 @@ public:
     ball_center.data.clear();
     contours.clear();
 
-    //msg_binary = cv_bridge::CvImage(std_msgs::Header(), "mono8", img_binary).toImageMsg();
-    //pub_binary.publish(msg_binary);
+    msg_binary = cv_bridge::CvImage(std_msgs::Header(), "mono8", img_binary).toImageMsg();
+    pub_binary.publish(msg_binary);
 
     cnt_proc += 1;
 

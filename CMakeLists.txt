@@ -188,6 +188,7 @@ add_executable(thread_left20200211 src/thread_left20200211.cpp)
 add_executable(thread_right20200211 src/thread_right20200211.cpp)
 add_executable(thread_left20200218 src/thread_left20200218.cpp)
 add_executable(thread_right20200218 src/thread_right20200218.cpp)
+add_executable(thread_right20200225 src/thread_right20200225.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -316,6 +317,8 @@ target_link_libraries(thread_right20200211 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L
 target_link_libraries(thread_left20200218 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 target_link_libraries(thread_right20200218 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_right20200225 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 #target_link_libraries(record_video ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
