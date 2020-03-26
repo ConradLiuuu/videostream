@@ -35,6 +35,9 @@ int main(int argc, char **argv)
   image_transport::Publisher pub_right = it.advertise("right_camera",1);
   sensor_msgs::ImagePtr msg_left, msg_right;
 
+  unsigned int SerialNumber_R = 17491073;
+  unsigned int SerialNumber_L = 17491067;
+
   BusManager busMgr;
 
   // Left eye 
@@ -50,14 +53,14 @@ int main(int argc, char **argv)
   PGRGuid guid_R;
 
   // Connect camera
-  busMgr.GetCameraFromIndex(1, &guid_L);
+  busMgr.GetCameraFromSerialNumber(SerialNumber_L, &guid_L);
   error_L = camera_L.Connect(&guid_L);
   if (error_L != PGRERROR_OK){
     //ROS_INFO("Failed to connect to left camera");
     return false;
   }
 
-  busMgr.GetCameraFromIndex(0, &guid_R);
+  busMgr.GetCameraFromSerialNumber(SerialNumber_R, &guid_R);
   error_R = camera_R.Connect(&guid_R);
   if (error_R != PGRERROR_OK){
     //ROS_INFO("Failed to connect to right camera");
@@ -144,10 +147,10 @@ int main(int argc, char **argv)
     // Conver to OpenCV Mat
     rowBytes_L = (double)bgrImage_L.GetReceivedDataSize() / (double)bgrImage_L.GetRows();
     img_R = cv::Mat(bgrImage_L.GetRows(), bgrImage_L.GetCols(), CV_8UC3, bgrImage_L.GetData(), rowBytes_L);
-    msg_left = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_R).toImageMsg();
+    msg_left = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_L).toImageMsg();
     rowBytes_R = (double)bgrImage_R.GetReceivedDataSize() / (double)bgrImage_R.GetRows();
     img_L = cv::Mat(bgrImage_R.GetRows(), bgrImage_R.GetCols(), CV_8UC3, bgrImage_R.GetData(), rowBytes_R);
-    msg_right = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_L).toImageMsg();
+    msg_right = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_R).toImageMsg();
 
     pub_left.publish(msg_left);
     pub_right.publish(msg_right);

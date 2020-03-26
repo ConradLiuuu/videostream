@@ -7,14 +7,27 @@ project(videostream)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+
+set(cv_bridge_DIR /usr/local/share/cv_bridge/cmake)
+
 find_package(catkin REQUIRED
   cv_bridge
   image_transport
   roscpp
   sensor_msgs
   std_msgs
-  OpenCV
+  #OpenCV
 )
+
+find_package(OpenCV REQUIRED
+NO_MODULE # should be optional, tells CMake to use config mode
+PATHS /usr/local # look here
+NO_DEFAULT_PATH) # and don't look anywhere else
+
+#message(STATUS "OpenCV library status:")
+#message(STATUS "    version: ${OpenCV_VERSION}")
+#message(STATUS "    libraries: ${OpenCV_LIBS}")
+#message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -118,6 +131,7 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
+
 include_directories(
  include
  ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} /usr/include/flycapture 
@@ -191,6 +205,11 @@ add_executable(thread_right20200218 src/thread_right20200218.cpp)
 add_executable(thread_right20200225 src/thread_right20200225.cpp)
 add_executable(thread_left20200302 src/thread_left20200302.cpp)
 add_executable(thread_right20200302 src/thread_right20200302.cpp)
+add_executable(thread_right20200310 src/thread_right20200310.cpp)
+add_executable(thread_left20200310 src/thread_left20200310.cpp)
+add_executable(cuda src/cuda.cpp)
+add_executable(thread_right_gpu src/thread_right_gpu.cpp)
+add_executable(thread_left_gpu src/thread_left_gpu.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -326,7 +345,17 @@ target_link_libraries(thread_left20200302 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L.
 
 target_link_libraries(thread_right20200302 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
+target_link_libraries(thread_right20200310 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(thread_left20200310 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
 #target_link_libraries(record_video ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+
+target_link_libraries(cuda ${OpenCV_LIBS})
+
+target_link_libraries(thread_right_gpu ${OpenCV_LIBS} ${catkin_LIBRARIES} -lflycapture${D}) 
+
+target_link_libraries(thread_left_gpu ${OpenCV_LIBS} ${catkin_LIBRARIES} -lflycapture${D}) 
 
 #############
 ## Install ##

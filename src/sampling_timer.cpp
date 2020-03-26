@@ -14,7 +14,7 @@ private:
 public:
   Sampling()
   {
-    freq_pub = 60;
+    freq_pub = 30;
     msg.data = true;
     pub = nh.advertise<std_msgs::Bool>("/sampling_time", 1);
     timer = nh.createTimer(ros::Duration(1.0 / freq_pub),std::bind(&Sampling::pub_bool, this));
