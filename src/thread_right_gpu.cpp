@@ -30,8 +30,6 @@ private:
     Image bgrImage;
     Property frmRate, prop;
 
-    double start_, end_;
-
     // OpenCV setting
     cv::Mat img, img_hsv, img_binary, img_ROI, element, img_serve, img2;
     cv::cuda::GpuMat uimg_src, uimg_dst;
@@ -66,6 +64,7 @@ private:
     unsigned int roi1_width, roi1_height;
     int contour_size; //check whether find table tennis
     double area;
+    double start_, end_;
 
     // save photos setting
     std::string path = "/home/lab606a/dic/right/";
@@ -156,14 +155,14 @@ public:
         //cout << "Zone A" << endl;
     }
     void Zone_B(){
-        img_x = center_in_world_frame.x - 200;
+        img_x = center_in_world_frame.x - center_last.x;
         img_y = 0;
         width = 400;
         height = 400;
         //cout << "Zone B" << endl;
     }
     void Zone_C(){
-        img_x = center_in_world_frame.x - 200;
+        img_x = center_in_world_frame.x - center_last.x;
         img_y = 0;
         width = 2048 - img_x;
         height = 400;
@@ -171,42 +170,42 @@ public:
     }
     void Zone_D(){
         img_x = 0;
-        img_y = center_in_world_frame.y - 100;
+        img_y = center_in_world_frame.y - center_last.y;
         width = 400;
         height = 400;
         //cout << "Zone D" << endl;
     }
     void Zone_E(){
-        img_x = center_in_world_frame.x - 200;
-        img_y = center_in_world_frame.y - 100;
+        img_x = center_in_world_frame.x - center_last.x;
+        img_y = center_in_world_frame.y - center_last.y;
         width = 400;
         height = 400;
         //cout << "Zone E" << endl;
     }
     void Zone_F(){
-        img_x = center_in_world_frame.x - 200;
-        img_y = center_in_world_frame.y - 100;
+        img_x = center_in_world_frame.x - center_last.x;
+        img_y = center_in_world_frame.y - center_last.y;
         width = 2048 - img_x;
         height = 400;
         //cout << "Zone F" << endl;
     }
     void Zone_G(){
         img_x = 0;
-        img_y = center_in_world_frame.y - 100;
+        img_y = center_in_world_frame.y - center_last.y;
         width = 400;
         height = 1536 - img_y;
         //cout << "Zone G" << endl;
     }
     void Zone_H(){
-        img_x = center_in_world_frame.x - 200;
-        img_y = center_in_world_frame.y - 100;
+        img_x = center_in_world_frame.x - center_last.x;
+        img_y = center_in_world_frame.y - center_last.y;
         width = 400;
         height = 1536 - img_y;
         //cout << "Zone H" << endl;
     }
     void Zone_I(){
-        img_x = center_in_world_frame.x - 200;
-        img_y = center_in_world_frame.y - 100;
+        img_x = center_in_world_frame.x - center_last.x;
+        img_y = center_in_world_frame.y - center_last.y;
         width = 2048 - img_x;
         height = 1536 - img_y;
         //cout << "Zone I" << endl;
@@ -240,7 +239,7 @@ public:
 
     void find_ball(){
         uimg_src.upload(img_serve);
-        cv::cuda::cvtColor(uimg_src, uimg_dst, CV_BGR2HSV);
+        cv::cuda::cvtColor(uimg_src, uimg_dst, CV_BGR2HSV_FULL);
         uimg_dst.download(img_hsv);
         //cv::cvtColor(img_serve, img_hsv, CV_BGR2HSV);
         cv::inRange(img_hsv, cv::Scalar(H_min, S_min, V_min), cv::Scalar(H_max, S_max, V_max), img_binary);
@@ -254,7 +253,7 @@ public:
         // minEnclosingCircle processing
         for (int i = 0; i < contours.size(); i++){
             area = cv::contourArea(contours[i]);
-            if ((area > 30)){
+            if ((area > 50)){
                 cv::minEnclosingCircle(contours[i], center, radius);
                 //cout << "right radius = " << radius << endl;
             }
@@ -282,20 +281,20 @@ public:
             if (img_serve.cols == 640){
                 cout << "-----640------" << endl;
                 center_in_world_frame = center_int_type + T_one2ori;
-                cout << "right center640 = " << center_in_world_frame << endl;
+                //cout << "right center640 = " << center_in_world_frame << endl;
             }
             if (img_serve.cols == 400){
                 delta = center_int_type-center_last;
                 //cout << "delta = " << delta << endl;
                 center_in_world_frame = center_in_world_frame + delta;
-                cout << "right center = " << center_in_world_frame << endl;
+                //cout << "right center = " << center_in_world_frame << endl;
             }
             set_track_window();
         }
         else{
             delta = cv::Point2i(0,0);
             center_int_type = cv::Point2i(0,0);
-            center_last = cv::Point2i(200,200);
+            //center_last = cv::Point2i(200,100);
             center = cv::Point2f(0,0);
             center_in_world_frame = cv::Point2i(-1,-1);
             img2 = img.clone();
@@ -315,10 +314,12 @@ public:
         buttom.x = top.x + width;
         buttom.y = top.y + height;
         img2 = img.clone();
+        //cv::circle(img2, center, radius, cv::Scalar(255,0, 0), 3, 8, 0);
         cv::rectangle(img2, top, buttom, cv::Scalar(0,0,255), 3, 8, 0);
     }
     
     void ImageProcessing(const std_msgs::Bool::ConstPtr& msg){
+        start_ = ros::Time::now().toSec();
         error = camera.RetrieveBuffer(&rawImage);
         ROS_INFO("Right camera start to do image process %d", cnt_proc);
         num = ros::Time::now().toSec();
@@ -337,7 +338,7 @@ public:
         else{
             if ((center_in_world_frame.x > 0) && (center_in_world_frame.x < 1848) && (center_in_world_frame.y > 0) && (center_in_world_frame.y < 1436)){
                 if (img_serve.rows == 400){
-                    if ((center_in_world_frame.y -100) < 0){
+                    if ((center_in_world_frame.y - center_last.y) < 0){
                         if ((center_in_world_frame.x-200) < 0){
                             Zone_A();
                         }
@@ -382,7 +383,7 @@ public:
                     }
                 }
                 else if (img_serve.cols == 640){
-                    if ((center_in_world_frame.y-100) >= 0){
+                    if ((center_in_world_frame.y-center_last.y) >= 0){
                         Zone_E();
                     }
                     else{
@@ -402,6 +403,8 @@ public:
         pub_ROI.publish(msg_ROI);
 
         find_ball();
+        end_ = ros::Time::now().toSec();
+        //cout << (end_-start_) << endl;
     }
     
 };
