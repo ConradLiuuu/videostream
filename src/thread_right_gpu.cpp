@@ -88,7 +88,7 @@ public:
 
         /* ---Initialize OpenCV--- */
         morph_elem = 0; // for open processing
-        morph_size = 2; // for open processing
+        morph_size = 1; // for open processing
         roi1_width = 640;
         roi1_height = 200;
         radius = 5;
@@ -248,17 +248,20 @@ public:
         element = cv::getStructuringElement(morph_elem, cv::Size(2*morph_size + 1, 2*morph_size+1), cv::Point(morph_size, morph_size));
         cv::morphologyEx(img_binary, img_binary, 2, element);
 
+        cv::medianBlur(img_binary, img_binary, 3);
         cv::findContours(img_binary, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
         // minEnclosingCircle processing
         for (int i = 0; i < contours.size(); i++){
+            //cout << contours.size() << ", " << contours[i] << endl;
             area = cv::contourArea(contours[i]);
-            if ((area > 50)){
+            //cout << "right area = " << area << endl;
+            if ((area > 100)){
                 cv::minEnclosingCircle(contours[i], center, radius);
                 //cout << "right radius = " << radius << endl;
             }
         }
-
+        
         center_int_type.x = (int)center.x;
         center_int_type.y = (int)center.y;
 
@@ -279,7 +282,7 @@ public:
             //cv::imwrite(fileName, img, compression_params);
 
             if (img_serve.cols == 640){
-                cout << "-----640------" << endl;
+                //cout << "-----640------" << endl;
                 center_in_world_frame = center_int_type + T_one2ori;
                 //cout << "right center640 = " << center_in_world_frame << endl;
             }
@@ -314,7 +317,7 @@ public:
         buttom.x = top.x + width;
         buttom.y = top.y + height;
         img2 = img.clone();
-        //cv::circle(img2, center, radius, cv::Scalar(255,0, 0), 3, 8, 0);
+        cv::circle(img2, center_in_world_frame, radius, cv::Scalar(0,255, 0), 10, 8, 0);
         cv::rectangle(img2, top, buttom, cv::Scalar(0,0,255), 3, 8, 0);
     }
     
