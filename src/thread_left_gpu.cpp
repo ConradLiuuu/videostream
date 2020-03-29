@@ -32,7 +32,7 @@ private:
 
     // OpenCV setting
     cv::Mat img, img_hsv, img_binary, img_ROI, element, img_serve, img2;
-    cv::cuda::GpuMat uimg_src, uimg_dst;
+    cv::cuda::GpuMat uimg_src, uimg_dst, med_src, med_dst;
 
     cv::Point2f center; // for minEnclosingCircle
     cv::Point2i center_int_type, center_last, center_in_world_frame;
@@ -96,7 +96,7 @@ public:
         center = cv::Point2f(0,0);
         center_int_type = cv::Point2i(0,0);
         center_last = cv::Point2i(200,100);
-        T_one2ori = cv::Point2i(920,210);
+        T_one2ori = cv::Point2i(770,310);
         delta = cv::Point2i(0,0);
 
         /* --- Initialize save photo setting--- */
@@ -126,7 +126,7 @@ public:
         prop.onOff = true;
         prop.autoManualMode = false;
         prop.valueA = 644;
-        prop.valueB = 914;
+        prop.valueB = 955;
         error = camera.SetProperty(&prop); 
         // start take photo
         error = camera.StartCapture();
@@ -215,7 +215,7 @@ public:
         ball_center.data.push_back(cnt_proc);
         ball_center.data.push_back(center_in_world_frame.x);
         ball_center.data.push_back(center_in_world_frame.y);
-        ball_center.data.push_back(contour_size);
+        //ball_center.data.push_back(contour_size);
         pub_center.publish(ball_center);
         ball_center.data.clear();
     }
@@ -245,17 +245,27 @@ public:
         cv::inRange(img_hsv, cv::Scalar(H_min, S_min, V_min), cv::Scalar(H_max, S_max, V_max), img_binary);
 
         // Open processing
-        element = cv::getStructuringElement(morph_elem, cv::Size(2*morph_size + 1, 2*morph_size+1), cv::Point(morph_size, morph_size));
-        cv::morphologyEx(img_binary, img_binary, 2, element);
+        //element = cv::getStructuringElement(morph_elem, cv::Size(2*morph_size + 1, 2*morph_size+1), cv::Point(morph_size, morph_size));
+        //cv::morphologyEx(img_binary, img_binary, 2, element);
 
-        cv::medianBlur(img_binary, img_binary, 3);
+        cv::medianBlur(img_binary, img_binary, 5);
+        
+
+        //cv::medianBlur(img_binary, img_binary, 5);
+        //med_src.upload(img_binary);
+        //cv::Ptr<cv::cuda::Filter> median = cv::cuda::createMedianFilter(med_src.type(), 3);
+        //median->apply(med_src, med_dst);
+        //med_dst.download(img_binary);
+
+        //cv::dilate(img_binary, img_binary, element);
+
         cv::findContours(img_binary, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
         // minEnclosingCircle processing
         for (int i = 0; i < contours.size(); i++){
             area = cv::contourArea(contours[i]);
             //cout << "left area = " << area << endl;
-            if ((area > 100)){
+            if ((area > 70)){
                 cv::minEnclosingCircle(contours[i], center, radius);
                 //cout << "left radius = " << radius << endl;
             }
@@ -263,14 +273,14 @@ public:
 
         center_int_type.x = (int)center.x;
         center_int_type.y = (int)center.y;
-
+        /*
         if (radius > 3){
             contour_size = 1;
         }
         else{
             contour_size = 0;
         }
-
+        */
         calculate_in_world();
     }
 
@@ -304,8 +314,8 @@ public:
         pub_center_();
         contours.clear();
 
-        msg_binary = cv_bridge::CvImage(std_msgs::Header(), "mono8", img_binary).toImageMsg();
-        pub_binary.publish(msg_binary);
+        //msg_binary = cv_bridge::CvImage(std_msgs::Header(), "mono8", img_binary).toImageMsg();
+        //pub_binary.publish(msg_binary);
 
         cnt_proc += 1;
     }
@@ -316,7 +326,7 @@ public:
         buttom.x = top.x + width;
         buttom.y = top.y + height;
         img2 = img.clone();
-        cv::circle(img2, center_in_world_frame, radius, cv::Scalar(0,255,0), 10, 8, 0);
+        cv::circle(img2, center_in_world_frame, radius, cv::Scalar(0,255,0), 3, 8, 0);
         cv::rectangle(img2, top, buttom, cv::Scalar(0,0,255), 3, 8, 0);
     }
     
@@ -401,8 +411,8 @@ public:
             img_serve = img(cv::Rect(img_x, img_y, width, height));
         }
 
-        msg_ROI = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_serve).toImageMsg();
-        pub_ROI.publish(msg_ROI);
+        //msg_ROI = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_serve).toImageMsg();
+        //pub_ROI.publish(msg_ROI);
 
         find_ball();
         end_ = ros::Time::now().toSec();
