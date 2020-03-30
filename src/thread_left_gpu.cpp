@@ -28,7 +28,7 @@ private:
     PGRGuid guid;
     Image rawImage;
     Image bgrImage;
-    Property frmRate, prop;
+    Property frmRate_set, prop, frmRate_get;
 
     // OpenCV setting
     cv::Mat img, img_hsv, img_binary, img_ROI, element, img_serve, img2;
@@ -88,7 +88,7 @@ public:
 
         /* ---Initialize OpenCV--- */
         morph_elem = 0; // for open processing
-        morph_size = 1; // for open processing
+        morph_size = 2; // for open processing
         roi1_width = 640;
         roi1_height = 200;
         radius = 5;
@@ -117,10 +117,17 @@ public:
         SerialNumber = 17491073;
         busMgr.GetCameraFromSerialNumber(SerialNumber, &guid);
         error = camera.Connect(&guid);
+        // set take photo frame rate
+        frmRate_set.type = FRAME_RATE;
+        frmRate_set.onOff = true;
+        frmRate_set.autoManualMode = false;
+        frmRate_set.absControl = true;
+        frmRate_set.absValue = 120;
+        error = camera.SetProperty(&frmRate_set);
         // get take photo frame rate
-        frmRate.type = FRAME_RATE;
-        error = camera.GetProperty(&frmRate);
-        cout << "Leftt camera setting frameRate = " << frmRate.absValue << endl;
+        frmRate_get.type = FRAME_RATE;
+        error = camera.GetProperty(&frmRate_get);
+        cout << "Leftt camera setting frameRate = " << frmRate_get.absValue << endl;
         // set camera white balance
         prop.type = WHITE_BALANCE;
         prop.onOff = true;
@@ -265,7 +272,7 @@ public:
         for (int i = 0; i < contours.size(); i++){
             area = cv::contourArea(contours[i]);
             //cout << "left area = " << area << endl;
-            if ((area > 70)){
+            if ((area > 50)){
                 cv::minEnclosingCircle(contours[i], center, radius);
                 //cout << "left radius = " << radius << endl;
             }
@@ -299,7 +306,7 @@ public:
                 delta = center_int_type-center_last;
                 //cout << "delta = " << delta << endl;
                 center_in_world_frame = center_in_world_frame + delta;
-                //cout << "left center = " << center_in_world_frame << endl;
+                cout << "left center = " << center_in_world_frame << endl;
             }
             set_track_window();
         }
@@ -314,8 +321,8 @@ public:
         pub_center_();
         contours.clear();
 
-        //msg_binary = cv_bridge::CvImage(std_msgs::Header(), "mono8", img_binary).toImageMsg();
-        //pub_binary.publish(msg_binary);
+        msg_binary = cv_bridge::CvImage(std_msgs::Header(), "mono8", img_binary).toImageMsg();
+        pub_binary.publish(msg_binary);
 
         cnt_proc += 1;
     }
@@ -333,7 +340,7 @@ public:
     void ImageProcessing(const std_msgs::Bool::ConstPtr& msg){
         start_ = ros::Time::now().toSec();
         error = camera.RetrieveBuffer(&rawImage);
-        ROS_INFO("Left camera start to do image process %d", cnt_proc);
+        ROS_INFO("Left camera starts to do image process %d.", cnt_proc);
         num = ros::Time::now().toSec();
         // raw data convert to OpenCV format
         rawImage.Convert(FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage);
