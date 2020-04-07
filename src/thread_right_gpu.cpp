@@ -338,10 +338,10 @@ public:
     }
     
     void ImageProcessing(const std_msgs::Bool::ConstPtr& msg){
-        //ROS_INFO("Right camera start to do image process %d", cnt_proc);
+        ROS_INFO("Right camera starts to do image process %d.", cnt_proc);
         start_ = ros::Time::now().toSec();
         error = camera.RetrieveBuffer(&rawImage);
-        ROS_INFO("Right camera starts to do image process %d.", cnt_proc);
+        //ROS_INFO("Right camera starts to do image process %d.", cnt_proc);
         num = ros::Time::now().toSec();
         // raw data convert to OpenCV format
         rawImage.Convert(FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage);
