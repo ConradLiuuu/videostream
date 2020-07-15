@@ -155,35 +155,35 @@ public:
     img_y = 0;
     width = 400;
     height = 400;
-    cout << "Zone A" << endl;
+    //cout << "Zone A" << endl;
   }
   void Zone_B(){
     img_x = center_in_world_frame.x - 200;
     img_y = 0;
     width = 400;
     height = 400;
-    cout << "Zone B" << endl;
+    //cout << "Zone B" << endl;
   }
   void Zone_C(){
     img_x = center_in_world_frame.x - 200;
     img_y = 0;
     width = 2048 - img_x;
     height = 400;
-    cout << "Zone C" << endl;
+    //cout << "Zone C" << endl;
   }
   void Zone_D(){
     img_x = 0;
     img_y = center_in_world_frame.y - 100;
     width = 400;
     height = 400;
-    cout << "Zone D" << endl;
+    //cout << "Zone D" << endl;
   }
   void Zone_E(){
     img_x = center_in_world_frame.x - 200;
     img_y = center_in_world_frame.y - 100;
     width = 400;
     height = 400;
-    cout << "Zone E" << endl;
+    //cout << "Zone E" << endl;
     //delta = cv::Point2i(0,0);
     //cout << "deltaaa = " << delta << endl;
   }
@@ -192,32 +192,32 @@ public:
     img_y = center_in_world_frame.y - 100;
     width = 2048 - img_x;
     height = 400;
-    cout << "Zone F" << endl;
+    //cout << "Zone F" << endl;
   }
   void Zone_G(){
     img_x = 0;
     img_y = center_in_world_frame.y - 100;
     width = 400;
     height = 1536 - img_y;
-    cout << "Zone G" << endl;
+    //cout << "Zone G" << endl;
   }
   void Zone_H(){
     img_x = center_in_world_frame.x - 200;
     img_y = center_in_world_frame.y - 100;
     width = 400;
     height = 1536 - img_y;
-    cout << "Zone H" << endl;
+    //cout << "Zone H" << endl;
   }
   void Zone_I(){
     img_x = center_in_world_frame.x - 200;
     img_y = center_in_world_frame.y - 100;
     width = 2048 - img_x;
     height = 1536 - img_y;
-    cout << "Zone I" << endl;
+    //cout << "Zone I" << endl;
   }
 
   void ImageProcessing(const std_msgs::Bool::ConstPtr& msg){
-    //startt_proc = ros::Time::now().toSec();
+    startt_proc = ros::Time::now().toSec();
     error = camera.RetrieveBuffer(&rawImage);
     ROS_INFO("Right camera start to do image process %d", cnt_proc);
     num = ros::Time::now().toSec();
@@ -316,7 +316,7 @@ public:
     msg_ROI = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_serve).toImageMsg();
     pub_ROI.publish(msg_ROI);
 
-    cv::cvtColor(img_serve, img_hsv, CV_BGR2HSV);
+    cv::cvtColor(img_serve, img_hsv, CV_BGR2HSV_FULL);
     cv::inRange(img_hsv, cv::Scalar(H_min, S_min, V_min), cv::Scalar(H_max, S_max, V_max), img_binary);
 
     // Open processing
@@ -360,7 +360,7 @@ public:
         cout << "-----640------" << endl;
         //T_two2one = center_int_type - center_last;
         center_in_world_frame = center_int_type/* + T_two2one*/ + T_one2ori;
-        cout << "right center640 = " << center_in_world_frame << endl;
+        //cout << "right center640 = " << center_in_world_frame << endl;
       }
       if (img_serve.cols == 400){
         //cout << "-----300------" << endl;
@@ -368,10 +368,10 @@ public:
         //center_in_world_frame = center_last + T_two2one + T_one2ori + delta;
         delta = center_int_type-center_last;
         //center_last = center_last+delta;
-        cout << "delta = " << delta << endl;
+        //cout << "delta = " << delta << endl;
         center_in_world_frame = center_in_world_frame + delta;
         //center_last = center_last - delta;
-        cout << "right center = " << center_in_world_frame << endl;
+        //cout << "right center = " << center_in_world_frame << endl;
       }
       //top = center_in_world_frame-cv::Point2i(200,200);
       //buttom = center_in_world_frame+cv::Point2i(200,200);
@@ -385,7 +385,7 @@ public:
     else {
       delta = cv::Point2i(0,0);
       center_int_type = cv::Point2i(0,0);
-      center_last = cv::Point2i(200,200);
+      //center_last = cv::Point2i(200,100);
       center = cv::Point2f(0,0);
       center_in_world_frame = cv::Point2i(-1,-1);
       img2 = img.clone();
@@ -403,8 +403,8 @@ public:
 
     cnt_proc += 1;
 
-    //endd_proc = ros::Time::now().toSec();
-    //second_proc = endd_proc - startt_proc;
+    endd_proc = ros::Time::now().toSec();
+    second_proc = endd_proc - startt_proc;
     //cout << "right processing time = " << second_proc << endl;
     //cout << second_proc << endl;
   }

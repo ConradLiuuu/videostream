@@ -27,8 +27,11 @@ int main(int argc, char **argv)
   BusManager busMgr;
   PGRGuid guid_L;
 
+  unsigned int SerialNumber = 17491067; // right
+  //unsigned int SerialNumber = 17491073; // left
+
   // Connect camera
-  busMgr.GetCameraFromIndex(0, &guid_L);
+  busMgr.GetCameraFromSerialNumber(SerialNumber, &guid_L);
   error = camera.Connect(&guid_L);
   if (error != PGRERROR_OK){
     ROS_INFO("Failed to connect to camera");

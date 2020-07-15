@@ -91,7 +91,7 @@ public:
 
     cnt_proc = 1;
     morph_elem = 0;
-    morph_size = 1;
+    morph_size = 2;
     
     roi1_width = 640;
     roi1_height = 200;
@@ -147,63 +147,63 @@ public:
     img_y = 0;
     width = 400;
     height = 400;
-    cout << "Zone A" << endl;
+    //cout << "Zone A" << endl;
   }
   void Zone_B(){
     img_x = center_in_world_frame.x - 200;
     img_y = 0;
     width = 400;
     height = 400;
-    cout << "Zone B" << endl;
+    //cout << "Zone B" << endl;
   }
   void Zone_C(){
     img_x = center_in_world_frame.x - 200;
     img_y = 0;
     width = 2048 - img_x;
     height = 400;
-    cout << "Zone C" << endl;
+    //cout << "Zone C" << endl;
   }
   void Zone_D(){
     img_x = 0;
     img_y = center_in_world_frame.y - 100;
     width = 400;
     height = 400;
-    cout << "Zone D" << endl;
+    //cout << "Zone D" << endl;
   }
   void Zone_E(){
     img_x = center_in_world_frame.x - 200;
     img_y = center_in_world_frame.y - 100;
     width = 400;
     height = 400;
-    cout << "Zone E" << endl;
+    //cout << "Zone E" << endl;
   }
   void Zone_F(){
     img_x = center_in_world_frame.x - 200;
     img_y = center_in_world_frame.y - 100;
     width = 2048 - img_x;
     height = 400;
-    cout << "Zone F" << endl;
+    //cout << "Zone F" << endl;
   }
   void Zone_G(){
     img_x = 0;
     img_y = center_in_world_frame.y - 100;
     width = 400;
     height = 1536 - img_y;
-    cout << "Zone G" << endl;
+    //cout << "Zone G" << endl;
   }
   void Zone_H(){
     img_x = center_in_world_frame.x - 200;
     img_y = center_in_world_frame.y - 100;
     width = 400;
     height = 1536 - img_y;
-    cout << "Zone H" << endl;
+    //cout << "Zone H" << endl;
   }
   void Zone_I(){
     img_x = center_in_world_frame.x - 200;
     img_y = center_in_world_frame.y - 100;
     width = 2048 - img_x;
     height = 1536 - img_y;
-    cout << "Zone I" << endl;
+    //cout << "Zone I" << endl;
   }
 
   void ImageProcessing(const std_msgs::Bool::ConstPtr& msg){
@@ -322,14 +322,16 @@ public:
     // minEnclosingCircle processing
     for (int i = 0; i < contours.size(); i++){
       double area = cv::contourArea(contours[i]);
-      if ((area > 40)){
+      //cout << area << endl;
+      if ((area > 50)){
         cv::minEnclosingCircle(contours[i], center, radius);
+        //cout << "left radius = " << radius << endl;
       }
     }
     center_int_type.x = (int)center.x;
     center_int_type.y = (int)center.y;
 
-    if (radius > 5){
+    if (radius > 4){
       contour_size = 1;
     }
     else{

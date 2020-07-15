@@ -214,7 +214,7 @@ public:
   }
 
   void ImageProcessing(const std_msgs::Bool::ConstPtr& msg){
-    //startt_proc = ros::Time::now().toSec();
+    startt_proc = ros::Time::now().toSec();
     error = camera.RetrieveBuffer(&rawImage);
     ROS_INFO("Left camera start to do image process %d", cnt_proc);
     num = ros::Time::now().toSec();
@@ -313,7 +313,7 @@ public:
     msg_ROI = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_serve).toImageMsg();
     pub_ROI.publish(msg_ROI);
 
-    cv::cvtColor(img_serve, img_hsv, CV_BGR2HSV);
+    cv::cvtColor(img_serve, img_hsv, CV_BGR2HSV_FULL);
     cv::inRange(img_hsv, cv::Scalar(H_min, S_min, V_min), cv::Scalar(H_max, S_max, V_max), img_binary);
 
     // Open processing
@@ -352,7 +352,7 @@ public:
       if (img_serve.cols == 640){
         //T_two2one = center_int_type - center_last;
         center_in_world_frame = center_int_type/* + T_two2one*/ + T_one2ori;
-        cout << "left center640 = " << center_in_world_frame << endl;
+        //cout << "left center640 = " << center_in_world_frame << endl;
       }
 
       if (img_serve.cols == 400){
@@ -360,7 +360,7 @@ public:
         //center_in_world_frame = center_last + T_two2one + T_one2ori + delta;
         delta = center_int_type-center_last;
         center_in_world_frame = center_in_world_frame + delta;
-        cout << "left center = " << center_in_world_frame << endl;
+        //cout << "left center = " << center_in_world_frame << endl;
       }
       //top = center_in_world_frame-cv::Point2i(200,200);
       //buttom = center_in_world_frame+cv::Point2i(200,200);
@@ -392,8 +392,8 @@ public:
   
     cnt_proc += 1;
 
-    //endd_proc = ros::Time::now().toSec();
-    //second_proc = endd_proc - startt_proc;
+    endd_proc = ros::Time::now().toSec();
+    second_proc = endd_proc - startt_proc;
     //cout << "left processing time = " << second_proc << endl;
     //cout << second_proc << endl;
   }

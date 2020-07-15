@@ -204,10 +204,11 @@ public:
   void callback(const std_msgs::Bool::ConstPtr& msg){
     //ROS_INFO("Left camera start to do image process");
     //img_serve = img(cv::Rect(650, 230, 640, 480));
+    startt_proc = ros::Time::now().toSec();
 
     if ((center.x == 0) && (center.y == 0)){
       //cout << "not find ball \n";
-      img_serve = img(cv::Rect(T_one2ori.x, T_one2ori.y, 640, 480));
+      img_serve = img(cv::Rect(T_one2ori.x, T_one2ori.y, 640, 240));
       delta = cv::Point2f(0,0);
       //delta.x = 0;
       //delta.y = 0;
@@ -216,7 +217,6 @@ public:
       //cout << img_serve.cols << ", " << img_serve.rows << endl;
     }
     else {
-      cout << "last = " << center_in_world_frame << endl;
       if ((center_in_world_frame.x < 1848) && (center_in_world_frame.y < 1336)){
         if (img_serve.cols == 640){
           T_two2one = center - center_last;
@@ -231,12 +231,15 @@ public:
           center_in_world_frame = center_last + T_two2one + T_one2ori + delta;
           img_x = (int)center_in_world_frame.x - 100;
           img_y = (int)center_in_world_frame.y - 100;
-          cout << center_in_world_frame << endl;
         }
+        ball_center.data.push_back(center_in_world_frame.x);
+        ball_center.data.push_back(center_in_world_frame.y);
+        pub_center.publish(ball_center);
         img_serve = img(cv::Rect(img_x, img_y, 200, 200));
+        ball_center.data.clear();
       }
       else {
-        img_serve = img(cv::Rect(T_one2ori.x, T_one2ori.y, 640, 480));
+        img_serve = img(cv::Rect(T_one2ori.x, T_one2ori.y, 640, 240));
         delta = cv::Point2f(0,0);
         center = cv::Point2f(0,0);
         center_in_world_frame = cv::Point2f(0,0);
@@ -303,7 +306,7 @@ public:
     msg_ROI = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_serve).toImageMsg();
     pub_ROI.publish(msg_ROI);
 
-    startt_proc = ros::Time::now().toSec();
+    //startt_proc = ros::Time::now().toSec();
 /*
     if (center.x > 0 && center.y > 0 && (center.x+200)<2048 && (center.y+200)<1536){
       //cout << center << endl;
@@ -351,15 +354,15 @@ public:
         circle(img, center,radius,cv::Scalar(255,0,0), 3, 8,0);
       }
       */
-      ball_center.data.push_back(center.x);
-      ball_center.data.push_back(center.y);
-      pub_center.publish(ball_center);
+      //ball_center.data.push_back(center.x);
+      //ball_center.data.push_back(center.y);
+      //pub_center.publish(ball_center);
       //center_last.x = center.x;
       //center_last.y = center.y;
       contours.clear();
       hierarchy.clear();
       //radius = 0;
-      ball_center.data.clear();
+      //ball_center.data.clear();
     }
 
     msg_binary = cv_bridge::CvImage(std_msgs::Header(), "mono8", img_binary).toImageMsg();
@@ -397,10 +400,10 @@ public:
 */
     endd_proc = ros::Time::now().toSec();
     second_proc = endd_proc - startt_proc;
-    //cout << second_proc << endl;
-    fps_proc = 1 / second_proc;
-    binary_frameRate.data = fps_proc;
-    pub_binary_frameRate.publish(binary_frameRate);
+    cout << second_proc << endl;
+    //fps_proc = 1 / second_proc;
+    //binary_frameRate.data = fps_proc;
+    //pub_binary_frameRate.publish(binary_frameRate);
 
   }
 

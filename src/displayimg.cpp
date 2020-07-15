@@ -4,7 +4,7 @@ using namespace cv;
 
 int main(int argc, char** argv)
 {
-  Mat lenna = imread("/home/gtliu/lenna.jpeg");
+  Mat lenna = imread("/home/lab606a/Pictures/512to8_0318.png");
   //img = imread("/home/gtliu/lenna.jpeg");
 
   namedWindow("Figure",WINDOW_NORMAL);

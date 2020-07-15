@@ -31,7 +31,7 @@ private:
   Property frmRate;
 
   // openCV setting
-  cv::Mat img, img_hsv, img_binary, img_ROI, element;
+  cv::Mat img, img_hsv, img_binary, img_ROI, element, img_serve;
   int morph_elem;
   int morph_size;
 
@@ -41,6 +41,9 @@ private:
   vector<vector<cv::Point> > contour;
 
   cv::Point2f center;
+  cv::Point2f center_last;
+  cv::Point2f T_one2ori, T_two2one, delta;
+  cv::Point2f center_in_world_frame;
   float radius;
 
   // ros setting
@@ -63,8 +66,17 @@ private:
 
   int H_min, H_max, S_min, S_max, V_min, V_max;
   bool proc_minEnclosingCircle, proc_opening, proc_dilate;
+  bool func;
+
+  int img_x, img_y;
 
 public:
+  std::string path = "/home/lab606a/dic/left/";
+  std::string fileName_L;
+  std::string baseName_L = "left";
+  std::string num;
+  vector<int> compression_params;
+
   Camera_(){
     SerialNumber = 17491073;
 
@@ -86,10 +98,15 @@ public:
     cnt_proc = 1;
     morph_elem = 0;
     morph_size = 1;
+    compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
 
-    center.x = 0;
-    center.y = 0;
-    radius = 0;
+    //center.x = 0;
+    //center.y = 0;
+    center = cv::Point2f(0,0);
+    radius = 5;
+
+    center_last = cv::Point2f(100,100);
+    T_one2ori = cv::Point2f(650,230);
 
     nh.getParam("/dynamic_HSV_server/H_min_L", H_min);
     nh.getParam("/dynamic_HSV_server/H_max_L", H_max);
@@ -120,6 +137,7 @@ public:
     rawImage.Convert(FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage);
     rowBytes = (double)bgrImage.GetReceivedDataSize() / (double)bgrImage.GetRows();
     img = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(), rowBytes);
+    func = true;
 /*
     if (center.x > 0 && center.y > 0 && (center.x+200)<2048 && (center.y+200)<1536){
       img_ROI = img(cv::Rect((int)center.x-200, (int)center.y-200, 400, 400));
@@ -142,6 +160,7 @@ public:
     }
 */
     cnt += 1;
+    //func = false;
 
     if (cnt == (int)frmRate.absValue){
       endd = ros::Time::now().toSec();
@@ -156,7 +175,6 @@ public:
       
   }
 
-
   void operator()(){
     sub = nh.subscribe("/sampling_time", 1, &Camera_::callback, this);
   }
@@ -164,7 +182,59 @@ public:
   void callback(const std_msgs::Bool::ConstPtr& msg){
     ROS_INFO("Left camera start to do image process %d", cnt_proc);
 
+    num = std::to_string(ros::Time::now().toSec());
+    fileName_L = path + baseName_L + std::to_string(cnt_proc) + "_" + num + ".jpg";
+    cv::imwrite(fileName_L, img, compression_params);
+
     startt_proc = ros::Time::now().toSec();
+
+    if ((center.x == 0) && (center.y == 0)){
+      //cout << "not find ball \n";
+      img_serve = img(cv::Rect(T_one2ori.x, T_one2ori.y, 640, 240));
+      delta = cv::Point2f(0,0);
+      center_in_world_frame = cv::Point2f(-1,-1);
+      ball_center.data.push_back(center_in_world_frame.x);
+      ball_center.data.push_back(center_in_world_frame.y);
+      pub_center.publish(ball_center);
+      ball_center.data.clear();
+      //delta.x = 0;
+      //delta.y = 0;
+      //center_last.x = 200;
+      //center_last.y = 200;
+      //cout << img_serve.cols << ", " << img_serve.rows << endl;
+    }
+    else {
+      if ((center_in_world_frame.x >=0) && (center_in_world_frame.x < 1848) && (center_in_world_frame.y >= 0) && (center_in_world_frame.y < 1336)){
+        if (img_serve.cols == 640){
+          T_two2one = center - center_last;
+
+          center_in_world_frame = center_last + T_two2one + T_one2ori;
+
+          img_x = (int)center_in_world_frame.x - 100;
+          img_y = (int)center_in_world_frame.y - 100;
+        }
+        if (img_serve.cols == 200){
+          delta = delta + (center - center_last);
+          center_in_world_frame = center_last + T_two2one + T_one2ori + delta;
+          img_x = (int)center_in_world_frame.x - 100;
+          img_y = (int)center_in_world_frame.y - 100;
+        }
+        ball_center.data.push_back(center_in_world_frame.x);
+        ball_center.data.push_back(center_in_world_frame.y);
+        pub_center.publish(ball_center);
+        img_serve = img(cv::Rect(img_x, img_y, 200, 200));
+        ball_center.data.clear();
+      }
+      else {
+        img_serve = img(cv::Rect(T_one2ori.x, T_one2ori.y, 640, 240));
+        delta = cv::Point2f(0,0);
+        center = cv::Point2f(0,0);
+        center_in_world_frame = cv::Point2f(0,0);
+      }
+    }
+
+    msg_ROI = cv_bridge::CvImage(std_msgs::Header(), "bgr8", img_serve).toImageMsg();
+    pub_ROI.publish(msg_ROI);
 /*
     if (center.x > 0 && center.y > 0 && (center.x+200)<2048 && (center.y+200)<1536){
       //cout << center << endl;
@@ -176,7 +246,7 @@ public:
       pub_ROI.publish(msg_ROI);
     }
 */
-    cv::cvtColor(img, img_hsv, CV_BGR2HSV);
+    cv::cvtColor(img_serve, img_hsv, CV_BGR2HSV);
     cv::inRange(img_hsv, cv::Scalar(H_min, S_min, V_min), cv::Scalar(H_max, S_max, V_max), img_binary);
 
     // Open processing
@@ -198,11 +268,12 @@ public:
     nh.getParam("/dynamic_bool/proc_minEnclosingCircle", proc_minEnclosingCircle);
     if (proc_minEnclosingCircle == true){
       for (int i = 0; i < contours.size(); i++){
-        double area = cv::contourArea(contours[i]);
-        if (area > 160){
-        //cout << "area = " << area << endl;
+        double area = cv::contourArea(contours[i]);       
+        if ((area > 160) && (radius >= 5) && (radius < 40)){
+        //cout << "left area = " << area << endl;
           cv::minEnclosingCircle(contours[i], center, radius);
         }
+        //cout << "left radius = " << radius << endl;
       }
       //cout << "center = " << center.x << "," << center.y << endl;
       /*
@@ -210,13 +281,13 @@ public:
         circle(img, center,radius,cv::Scalar(255,0,0), 3, 8,0);
       }
       */
-      ball_center.data.push_back(center.x);
-      ball_center.data.push_back(center.y);
-      pub_center.publish(ball_center);
+      //ball_center.data.push_back(center.x);
+      //ball_center.data.push_back(center.y);
+      //pub_center.publish(ball_center);
       contours.clear();
       hierarchy.clear();
       //radius = 0;
-      ball_center.data.clear();
+      //ball_center.data.clear();
     }
 
     msg_binary = cv_bridge::CvImage(std_msgs::Header(), "mono8", img_binary).toImageMsg();
@@ -227,10 +298,11 @@ public:
     endd_proc = ros::Time::now().toSec();
     second_proc = endd_proc - startt_proc;
     //cout << second_proc << endl;
+    /*
     fps_proc = 1 / second_proc;
     binary_frameRate.data = fps_proc;
     pub_binary_frameRate.publish(binary_frameRate);
-
+    */
     //timer_isDone = nh.createTimer(ros::Duration(1.0 / 1),std::bind(&Camera_::isDone_func, this));
 /*
     for(int i = 0; i < 6; i++){

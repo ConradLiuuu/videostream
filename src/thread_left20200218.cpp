@@ -311,21 +311,21 @@ public:
     cv::morphologyEx(img_binary, img_binary, 2, element);
 
     // dilate processing
-    dilate(img_binary, img_binary, element);
+    //dilate(img_binary, img_binary, element);
 
     cv::findContours(img_binary, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
     // minEnclosingCircle processing
     for (int i = 0; i < contours.size(); i++){
       double area = cv::contourArea(contours[i]);
-      if ((area > 30)){
+      if ((area > 40)){
         cv::minEnclosingCircle(contours[i], center, radius);
       }
     }
     center_int_type.x = (int)center.x;
     center_int_type.y = (int)center.y;
 
-    if ((center_int_type.x >0) && (center_int_type.y > 0) && (center_in_world_frame.y < 1336)){
+    if ((center_int_type.x >0) && (center_int_type.y > 0) && (center_in_world_frame.y < 1336) && (radius > 5)){
       /* save image */
       //fileName_L = path + baseName_L + std::to_string(cnt_proc) + "_" + std::to_string(num) + ".jpg";
       //cv::imwrite(fileName_L, img, compression_params);
