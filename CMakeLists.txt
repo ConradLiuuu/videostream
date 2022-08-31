@@ -148,63 +148,8 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(ros_videostream src/ros_videostream.cpp)
-add_executable(displayimg src/displayimg.cpp)
-add_executable(capturevideo src/capturevideo.cpp)
-add_executable(canny src/canny.cpp)
-add_executable(HSV_reconfigure src/HSV_reconfigure.cpp)
-add_executable(object_detect src/object_detect.cpp)
-add_executable(flycapture src/flycapture.cpp)
-add_executable(ros_flycapture src/ros_flycapture.cpp)
-add_executable(flycapture_HSV_reconfugure src/flycapture_HSV_reconfugure.cpp)
-add_executable(eyes_HSV_reconfigure src/eyes_HSV_reconfigure.cpp)
-add_executable(flycapture_findball src/flycapture_findball.cpp)
-add_executable(fps src/fps.cpp)
-add_executable(takePhoto src/takePhoto.cpp)
-add_executable(takePhoto2 src/takePhoto2.cpp)
-add_executable(findcontour2020 src/findcontour2020.cpp)
-add_executable(frameRate src/frameRate.cpp)
-add_executable(frameRate_right src/frameRate_right.cpp)
-add_executable(flycapture_image_processing src/flycapture_image_processing.cpp)
-add_executable(thread_frameRate src/thread_frameRate.cpp)
-add_executable(frameRate_left src/frameRate_left.cpp)
-add_executable(frameRate_oop src/frameRate_oop.cpp)
-add_executable(frameRate_eyes src/frameRate_eyes.cpp)
-add_executable(frameRate_eyes_timer src/frameRate_eyes_timer.cpp)
-add_executable(eye_image_process src/eye_image_process.cpp)
-add_executable(image_process_left src/image_process_left.cpp)
-add_executable(image_process_right src/image_process_right.cpp)
-add_executable(positioning src/positioning.cpp)
-add_executable(sampling_timer src/sampling_timer.cpp)
-add_executable(image_process_test src/image_process_test.cpp)
-add_executable(thread_oop_test src/thread_oop_test.cpp)
 add_executable(thread_left src/thread_left.cpp)
 add_executable(thread_right src/thread_right.cpp)
-add_executable(stereo src/stereo.cpp)
-add_executable(stereo_oop src/stereo_oop.cpp)
-add_executable(thread_left20191125 src/thread_left20191125.cpp)
-add_executable(thread_right20191125 src/thread_right20191125.cpp)
-add_executable(thread_oop20191126 src/thread_oop20191126.cpp)
-add_executable(thread_left20191127 src/thread_left20191127.cpp)
-add_executable(thread_right20191127 src/thread_right20191127.cpp)
-add_executable(thread_left20191129 src/thread_left20191129.cpp)
-add_executable(thread_right20191129 src/thread_right20191129.cpp)
-add_executable(thread_left20191203 src/thread_left20191203.cpp)
-add_executable(thread_right20191203 src/thread_right20191203.cpp)
-add_executable(thread_left20191209 src/thread_left20191209.cpp)
-add_executable(thread_right20191209 src/thread_right20191209.cpp)
-#add_executable(record_video src/record_video.cpp)
-add_executable(thread_left20200102 src/thread_left20200102.cpp)
-add_executable(thread_right20200102 src/thread_right20200102.cpp)
-add_executable(thread_left20200211 src/thread_left20200211.cpp)
-add_executable(thread_right20200211 src/thread_right20200211.cpp)
-add_executable(thread_left20200218 src/thread_left20200218.cpp)
-add_executable(thread_right20200218 src/thread_right20200218.cpp)
-add_executable(thread_right20200225 src/thread_right20200225.cpp)
-add_executable(thread_left20200302 src/thread_left20200302.cpp)
-add_executable(thread_right20200302 src/thread_right20200302.cpp)
-add_executable(thread_right20200310 src/thread_right20200310.cpp)
-add_executable(thread_left20200310 src/thread_left20200310.cpp)
-add_executable(cuda src/cuda.cpp)
 add_executable(thread_right_gpu src/thread_right_gpu.cpp)
 add_executable(thread_left_gpu src/thread_left_gpu.cpp)
 
@@ -219,136 +164,11 @@ add_executable(thread_left_gpu src/thread_left_gpu.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(displayimg
-    ${OpenCV_LIBS}
-)
-target_link_libraries(capturevideo
-    ${OpenCV_LIBS}
-)
-target_link_libraries(ros_videostream
-    ${OpenCV_LIBS} 
-    ${catkin_LIBRARIES}
-)
-target_link_libraries(canny
-    ${OpenCV_LIBS}
-    ${catkin_LIBRARIES}
-)
-target_link_libraries(HSV_reconfigure
-    ${OpenCV_LIBS}
-    ${catkin_LIBRARIES}
-)
-target_link_libraries(object_detect
-    ${OpenCV_LIBS}
-    ${catkin_LIBRARIES}
-)
-target_link_libraries(stereo
-    ${OpenCV_LIBS}
-    ${catkin_LIBRARIES}
-)
-target_link_libraries(stereo_oop
-    ${OpenCV_LIBS}
-    ${catkin_LIBRARIES}
-)
-
-target_link_libraries(flycapture ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(ros_flycapture ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(flycapture_HSV_reconfugure ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(eyes_HSV_reconfigure ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(flycapture_findball ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(fps ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(takePhoto ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(takePhoto2 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(findcontour2020 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(frameRate ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(frameRate_right ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(flycapture_image_processing ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_frameRate ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(frameRate_left ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(frameRate_oop ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(frameRate_eyes ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(frameRate_eyes_timer ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(eye_image_process ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(image_process_left ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(image_process_right ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(positioning ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(image_process_test ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(sampling_timer ${OpenCV_LIBS} ${catkin_LIBRARIES})
-
-target_link_libraries(thread_oop_test ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
+target_link_libraries(ros_videostream ${OpenCV_LIBS} ${catkin_LIBRARIES})
 
 target_link_libraries(thread_left ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
 
 target_link_libraries(thread_right ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_left20191125 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_right20191125 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_oop20191126 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_left20191127 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_right20191127 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_left20191129 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_right20191129 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_left20191203 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_right20191203 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_left20191209 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_right20191209 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_left20200102 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_right20200102 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_left20200211 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_right20200211 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_left20200218 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_right20200218 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_right20200225 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_left20200302 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_right20200302 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_right20200310 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(thread_left20200310 ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-#target_link_libraries(record_video ${OpenCV_LIBS} ${catkin_LIBRARIES} -L../../lib -lflycapture${D} ${FC2_DEPS})
-
-target_link_libraries(cuda ${OpenCV_LIBS})
 
 target_link_libraries(thread_right_gpu ${OpenCV_LIBS} ${catkin_LIBRARIES} -lflycapture${D}) 
 
